@@ -3,17 +3,12 @@
 @using Microsoft.AspNetCore.Authorization
 
 @attribute [Authorize]
-@rendermode InteractiveAuto
+@rendermode InteractiveWebAssembly
 
 <PageTitle>Auth</PageTitle>
 
 <h1>You are authenticated</h1>
 
 <AuthorizeView>
-    <Authorized>
-        <p>Hello, @context.User.Identity?.Name!</p>
-    </Authorized>
-    <NotAuthorized>
-        <p>You're not authorized.</p>
-    </NotAuthorized>
+    Hello @context.User.Identity?.Name!
 </AuthorizeView>

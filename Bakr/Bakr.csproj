@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>aspnet-Bakr-b717ccdd-544f-4125-9ec7-3a54706068a1</UserSecretsId>
+    <UserSecretsId>aspnet-Bakr-80fcfb28-0835-49a9-a688-c4b3433b95cf</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,24 +12,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.10">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite.Core" Version="8.0.10" />
-    <PackageReference Include="MinimalApis.Extensions" Version="0.11.0" />
-    <PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.1.10" />
     <ProjectReference Include="..\Bakr.Client\Bakr.Client.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.8" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Data/Database/" />
-    <Folder Include="Data/Migrations/BakrMain/" />
   </ItemGroup>
 
 </Project>
