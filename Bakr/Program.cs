@@ -18,6 +18,9 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, PersistingServerAuthenticationStateProvider>();
+// 👇 new code
+builder.Services.AddHttpClient();
+// 👆 new code
 
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication(options =>
