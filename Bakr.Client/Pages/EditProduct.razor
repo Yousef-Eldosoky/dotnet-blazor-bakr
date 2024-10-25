@@ -1,0 +1,110 @@
+﻿@page "/EditProduct"
+@page "/EditProduct/{id:int}"
+@using Bakr.Shared.Clients
+@using Bakr.Shared.Entities
+@rendermode InteractiveWebAssembly
+
+
+@inject GenresClient GenresClient
+@inject ProductsClient ProductClient
+@inject NavigationManager NavigationManager
+
+<PageTitle>@title</PageTitle>
+<h3>@title</h3>
+
+@if (genres is null || product is null)
+{
+  <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+        </div><EditForm Model="@product" FormName="EditProduct" OnValidSubmit="HandleSubmitAsync" Enhance>
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div class="mb-3">
+            <label for="name" class="form-label">Name:</label>
+            <InputText class="form-control" id="name" @bind-Value="product.Name" />
+            <ValidationMessage For="() => product.Name" />
+        </div>
+        <div class="mb-3">
+            <label for="genre" class="form-label">Genre:</label>
+            <InputSelect class="form-select" id="genre" @bind-Value="product.GenreId">
+            <option value="">Select a genre</option>
+            @foreach (Genre genre in genres)
+                {
+                <option value="@genre.Id">@genre.Name</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="() => product.GenreId" />
+        </div>
+        <div class="mb-3">
+            <label for="description" class="form-label">Description:</label>
+            <InputText class="form-control" id="description" @bind-Value="product.Description" />
+            <ValidationMessage For="() => product.Description" />
+        </div>
+        <div class="mb-3">
+            <label for="price" class="form-label">Price:</label>
+            <InputNumber class="form-control" id="price" @bind-Value="product.Price" />
+            <ValidationMessage For="() => product.Price" />
+        </div>
+        <div class="mb-3">
+            <label for="quantity" class="form-label">Quantity:</label>
+            <InputNumber class="form-control" id="Quantity" @bind-Value="product.Quantity" />
+            <ValidationMessage For="() => product.Quantity" />
+        </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+            <a class="btn btn-secondary" role="button" href="/">Cancel</a>
+        </EditForm>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int? Id {get; set;}
+
+    [SupplyParameterFromForm]
+    private Product? product {get; set;}
+
+    private Genre[]? genres;
+
+    string title = string.Empty;
+
+    protected override void OnParametersSet()
+    {
+        if(product is not null) return;
+        if (Id is null)
+        {
+            product = new()
+            {
+                Name = string.Empty,
+                Price = 0
+            };
+            title = "New Game";
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender) {
+        if(firstRender) {
+            genres = await GenresClient.GetGenresAsync();
+            if(Id is not null) {
+                product = await ProductClient.GetProductAsync(Id.Value);
+                title = $"Edit {product.Name}";
+            }
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandleSubmitAsync() {
+        ArgumentNullException.ThrowIfNull(product);
+        if(Id is null)
+            await ProductClient.AddProductAsync(product);
+        else {
+            product.Id = Id.Value;
+            await ProductClient.UpdateProductAsync(product);
+        }
+        NavigationManager.NavigateTo("/");
+    }
+
+}
