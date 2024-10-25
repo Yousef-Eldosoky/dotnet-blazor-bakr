@@ -5,6 +5,8 @@ using Bakr.Client.Pages;
 using Bakr.Components;
 using Bakr.Components.Account;
 using Bakr.Data;
+using Bakr.Mapping;
+using Bakr.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,9 +30,15 @@ builder.Services.AddAuthentication(options =>
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(connectionString));
+
+connectionString = builder.Configuration.GetConnectionString("BakrConnection") ?? throw new InvalidOperationException("Connection string 'BakrConnection' not found.");
+builder.Services.AddDbContext<BakrDbContext>(options =>
+    options.UseSqlite(connectionString));
+ 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();
@@ -63,5 +71,14 @@ app.MapRazorComponents<App>()
 
 // Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();
+
+// Add the app endpoints
+app.MapProductsEndpoint();
+app.MapGenreEndpoint();
+app.MapInvoiceEndpoint();
+
+// Creat users and roles for first time run
+IntialMethods.CreateRoles(app.Services.CreateScope().ServiceProvider).Wait();
+IntialMethods.CreateAdmin(app.Services.CreateScope().ServiceProvider).Wait();
 
 app.Run();
