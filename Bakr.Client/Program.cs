@@ -1,4 +1,5 @@
 using Bakr.Client;
+using Bakr.Shared.Clients;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
@@ -13,6 +14,8 @@ builder.Services.AddHttpClient("ServerAPI",
       client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
 builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>()
   .CreateClient("ServerAPI"));
+
+builder.Services.AddHttpClient<ProductsClient>(client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
 // 👆 new code
 
 await builder.Build().RunAsync();

@@ -7,6 +7,7 @@ using Bakr.Components.Account;
 using Bakr.Data;
 using Bakr.Mapping;
 using Bakr.Endpoints;
+using Bakr.Shared.Clients;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,9 +19,7 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, PersistingServerAuthenticationStateProvider>();
-// 👇 new code
-builder.Services.AddHttpClient();
-// 👆 new code
+builder.Services.AddHttpClient<ProductsClient>();
 
 builder.Services.AddAuthorization();
 builder.Services.AddAuthentication(options =>

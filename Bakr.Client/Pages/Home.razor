@@ -1,10 +1,11 @@
 ﻿@page "/"
+@using Bakr.Shared.Clients
 @using Bakr.Shared.Entities
 @using Microsoft.AspNetCore.Authorization
-@inject HttpClient Http
 @attribute [Authorize]
 @attribute [StreamRendering]
 @rendermode InteractiveWebAssembly
+@inject ProductsClient Client
 
 <PageTitle> Product Catalog</PageTitle>
 
@@ -60,7 +61,7 @@ else {
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender) {
-        products = await Http.GetFromJsonAsync<Product[]>("api/products");
+        products = await Client.GetProductsAsync();
         StateHasChanged();
     }
 } 
