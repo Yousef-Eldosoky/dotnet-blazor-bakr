@@ -2,7 +2,9 @@
 @page "/EditProduct/{id:int}"
 @using Bakr.Shared.Clients
 @using Bakr.Shared.Entities
+@using Bakr.Shared.Dtos
 @using Microsoft.AspNetCore.Authorization
+@using System.ComponentModel.DataAnnotations
 @attribute [Authorize(Policy = "AdminPolicy")]
 @rendermode InteractiveWebAssembly
 
@@ -71,7 +73,7 @@ else
     public int? Id {get; set;}
 
     [SupplyParameterFromForm]
-    private Product? product {get; set;}
+    private ProductDetails? product {get; set;}
 
     private Genre[]? genres;
 

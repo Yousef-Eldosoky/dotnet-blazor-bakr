@@ -1,11 +1,12 @@
-﻿@page "/"
+﻿@using Bakr.Client.Pages.Components
 @using Bakr.Shared.Clients
 @using Bakr.Shared.Entities
 @using Microsoft.AspNetCore.Authorization
-@attribute [Authorize]
+@attribute [Authorize(Policy = "AdminPolicy")]
 @attribute [StreamRendering]
 @rendermode InteractiveWebAssembly
 @inject ProductsClient Client
+@inject NavigationManager NavigationManager
 
 <PageTitle> Product Catalog</PageTitle>
 
@@ -35,7 +36,9 @@
                         <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="@GetDeleteModalId(product)">
                             <i class="bi bi-trash3"></i>
                         </button>
-                        @* <DeleteProduct Product="@product" /> *@
+                        <CascadingValue Value="this">
+                            <DeleteProduct Product="@product" />
+                        </CascadingValue>
                     </div>
                 </div>
                 </div>
@@ -56,14 +59,19 @@ else {
 
     private string GetDeleteModalId(Product product)
     {
-        //eturn $"#{DeleteProduct.GetModalId(product)}";
-        return "";
+        return $"#{DeleteProduct.GetModalId(product)}";
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender) {
-        if(firstRender) {
-            products = await Client.GetProductsAsync();
-            StateHasChanged();
-        }
+        if(firstRender) await GetProductsAsync();
+    }
+
+    private async Task GetProductsAsync() {
+        products = await Client.GetProductsAsync();
+        StateHasChanged();
+    }
+
+    public async Task RefreshStateAsync(){
+        await this.GetProductsAsync();
     }
 } 
