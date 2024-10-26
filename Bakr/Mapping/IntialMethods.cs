@@ -26,7 +26,6 @@ abstract public class IntialMethods
             };
             await userManger.CreateAsync(admin, password);
             await userManger.AddToRolesAsync(admin, roles);
-
         }
 
         ApplicationUser? stuff = await userManger.FindByEmailAsync("stuff@gmail.com");

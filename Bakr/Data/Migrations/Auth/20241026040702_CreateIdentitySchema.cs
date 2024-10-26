@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Bakr.Data.Migrations
+namespace Bakr.Data.Migrations.Auth
 {
     /// <inheritdoc />
     public partial class CreateIdentitySchema : Migration

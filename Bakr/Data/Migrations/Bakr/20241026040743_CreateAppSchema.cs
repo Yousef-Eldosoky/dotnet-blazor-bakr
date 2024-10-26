@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Bakr.Data.Migrations.Bakr
 {
     /// <inheritdoc />
-    public partial class CreateBakrSchema : Migration
+    public partial class CreateAppSchema : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Bakr.Data.Migrations.Bakr
 {
     [DbContext(typeof(BakrDbContext))]
-    [Migration("20241025062216_CreateBakrSchema")]
-    partial class CreateBakrSchema
+    [Migration("20241026040743_CreateAppSchema")]
+    partial class CreateAppSchema
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

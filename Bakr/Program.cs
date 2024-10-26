@@ -31,13 +31,13 @@ builder.Services.AddAuthentication(options =>
     })
     .AddIdentityCookies();
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+var connectionStringDefualt = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(connectionString));
+    options.UseSqlite(connectionStringDefualt));
 
-connectionString = builder.Configuration.GetConnectionString("BakrConnection") ?? throw new InvalidOperationException("Connection string 'BakrConnection' not found.");
+var connectionStringBakr = builder.Configuration.GetConnectionString("BakrConnection") ?? throw new InvalidOperationException("Connection string 'BakrConnection' not found.");
 builder.Services.AddDbContext<BakrDbContext>(options =>
-    options.UseSqlite(connectionString));
+    options.UseSqlite(connectionStringBakr));
  
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 

@@ -2,6 +2,8 @@
 @page "/EditProduct/{id:int}"
 @using Bakr.Shared.Clients
 @using Bakr.Shared.Entities
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Policy = "AdminPolicy")]
 @rendermode InteractiveWebAssembly
 
 
@@ -14,7 +16,11 @@
 
 @if (genres is null || product is null)
 {
-  <p><em>Loading...</em></p>
+    <div class="d-flex justify-content-center">
+        <div class="spinner-border m-5" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
 }
 else
 {
