@@ -1,8 +1,4 @@
-﻿@using Bakr.Client.Pages.Components
-@using Bakr.Shared.Clients
-@using Bakr.Shared.Entities
-@using Microsoft.AspNetCore.Authorization
-@attribute [Authorize(Policy = "AdminPolicy")]
+﻿@attribute [Authorize(Policy = "AdminPolicy")]
 @attribute [StreamRendering]
 @rendermode InteractiveWebAssembly
 @inject ProductsClient Client
