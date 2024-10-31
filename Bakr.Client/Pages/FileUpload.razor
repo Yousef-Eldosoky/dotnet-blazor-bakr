@@ -13,6 +13,12 @@
 <h1>File Upload Example</h1>
 
 <p>
+    Max file size:
+    <br>
+    @maxFileSize
+</p>
+
+<p>
     <label>
         Upload up to @maxAllowedFiles files:
         <InputFile OnChange="OnInputFileChange" />
@@ -24,41 +30,38 @@
     <p style="color:red;">@validationMessage</p>
 }
 
-@if (files.Count > 0)
-{
-    <div class="card">
+@if(file is not null) {
+<div class="card">
     <div class="card-body">
         <ul>
-            @foreach (var file in files)
+            <li>
+                File: @file.Name
+                <br>
+                @if (FileUploading(uploadResult, file.Name, Logger,
+                out var result))
                 {
-                    <li>
-                        File: @file.Name
-                        <br>
-                        @if (FileUploading(uploadResults, file.Name, Logger,
-                       out var result))
-                        {
-                            <span>
-                                Stored File Name: @result.StoredFileName
-                            </span>
-                        }
-                        else
-                        {
-                            <span>
-                                There was an error uploading the file
-                                (Error: @result.ErrorCode).
-                            </span>
-                        }
-                    </li>
+                    <span>
+                        Stored File Name: @result.StoredFileName
+                    </span>
                 }
-            </ul>
-        </div>
+                else
+                {
+                    <span>
+                        There was an error uploading the file
+                        (Error: @result.ErrorCode).
+                    </span>
+                }
+            </li>
+        </ul>
     </div>
+</div>
 }
 
 @code {
-    private List<File> files = new();
-    private List<UploadResult> uploadResults = new();
-    private int maxAllowedFiles = 3;
+    private IBrowserFile? file;
+    private UploadResult uploadResult = new();
+    private long maxFileSize = 1024 * 1024 * 1; // 1 mb
+    private int maxAllowedFiles = 1;
     private bool shouldRender;
     private string? validationMessage;
 
@@ -68,96 +71,83 @@
     {
         shouldRender = false;
         validationMessage = null;
-        long maxFileSize = 1024 * 1024 * 1; // 1 MB
         var upload = false;
+        file = e.File;
 
         using var content = new MultipartFormDataContent();
 
-        foreach (var file in e.GetMultipleFiles(maxAllowedFiles))
+        try
         {
-            if (uploadResults.SingleOrDefault(
-            f => f.FileName == file.Name) is null)
+            // Check if file is an image by MIME type
+            if (!file.ContentType.StartsWith("image/"))
             {
-                try
-                {
-                    // Check if file is an image by MIME type
-                    if (!file.ContentType.StartsWith("image/"))
-                    {
-                        validationMessage = "Only image files are allowed.";
-                        throw new ArgumentException("Accept images only");
-                    }
-                    files.Add(new() { Name = file.Name });
-
-                    var fileContent = new StreamContent(file.OpenReadStream(maxFileSize));
-
-                    fileContent.Headers.ContentType =
-                    new MediaTypeHeaderValue(file.ContentType);
-
-                    content.Add(
-                    content: fileContent,
-                    name: "\"files\"",
-                    fileName: file.Name);
-
-                    upload = true;
-                }
-                catch (ArgumentException) {
-                    Logger.LogInformation("{FileName} is not an allowed image type (Err: 5)", file.Name);
-                    uploadResults.Add(new UploadResult
-                    {
-                        FileName = file.Name,
-                        ErrorCode = 5, // Custom error code for invalid file type
-                        Uploaded = false
-                    });
-                }
-                catch (Exception ex)
-                {
-                    Logger.LogInformation(
-                    "{FileName} not uploaded (Err: 7): {Message}",
-                    file.Name, ex.Message);
-
-                    uploadResults.Add(
-                    new()
-                        {
-                            FileName = file.Name,
-                            ErrorCode = 7,
-                            Uploaded = false
-                        });
-                }
+                validationMessage = "Only image files are allowed.";
+                throw new ArgumentException("Accept images only");
             }
+
+            var fileContent = new StreamContent(file.OpenReadStream(maxFileSize));
+
+            fileContent.Headers.ContentType =
+            new MediaTypeHeaderValue(file.ContentType);
+
+            content.Add(
+            content: fileContent,
+            name: "\"files\"",
+            fileName: file.Name);
+
+            upload = true;
+        }
+        catch (ArgumentException) {
+            Logger.LogInformation("{FileName} is not an allowed image type (Err: 4)", file.Name);
+            uploadResult = new UploadResult
+            {
+                FileName = file.Name,
+                ErrorCode = 4, // Custom error code for invalid file type
+                Uploaded = false
+            };
+        }
+        catch (Exception ex)
+        {
+            Logger.LogInformation(
+            "{FileName} not uploaded (Err: 6): {Message}",
+            file.Name, ex.Message);
+
+            uploadResult =
+            new()
+                {
+                    FileName = file.Name,
+                    ErrorCode = 6,
+                    Uploaded = false
+                };
         }
 
         if (upload)
         {
             var response = await Http.PostAsync("/api/Filesave", content);
 
-            var newUploadResults = await response.Content
-            .ReadFromJsonAsync<IList<UploadResult>>();
+            var newUploadResult = await response.Content
+            .ReadFromJsonAsync<UploadResult>();
 
-            if (newUploadResults is not null)
+            if (newUploadResult is not null)
             {
-                uploadResults = uploadResults.Concat(newUploadResults).ToList();
+                uploadResult = newUploadResult;
             }
         }
 
         shouldRender = true;
     }
 
-    private static bool FileUploading(IList<UploadResult> uploadResults,
+    private static bool FileUploading(UploadResult uploadResult,
     string? fileName, ILogger<FileUpload> logger, out UploadResult result)
     {
-        result = uploadResults.SingleOrDefault(f => f.FileName == fileName) ?? new();
+        result = uploadResult;
 
         if (!result.Uploaded)
         {
-            logger.LogInformation("{FileName} not uploaded (Err: 6)", fileName);
-            result.ErrorCode = result.ErrorCode == 0 ? 6 : result.ErrorCode;
+            logger.LogInformation("{FileName} not uploaded (Err: 5)", fileName);
+            result.ErrorCode = result.ErrorCode == 0 ? 5 : result.ErrorCode;
         }
 
         return result.Uploaded;
-    }
-
-    private class File
-    {
-        public string? Name { get; set; }
     }
 }
