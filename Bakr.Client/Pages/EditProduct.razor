@@ -1,6 +1,7 @@
 ﻿@page "/EditProduct"
 @page "/EditProduct/{id:int}"
 @using Bakr.Shared.Dtos
+@using Bakr.Shared.Models
 @attribute [Authorize(Policy = "AdminPolicy")]
 @rendermode InteractiveWebAssembly
 
@@ -28,6 +29,16 @@ else
         </div><EditForm Model="@product" FormName="EditProduct" OnValidSubmit="HandleSubmitAsync" Enhance>
         <DataAnnotationsValidator />
         <ValidationSummary />
+        @if(@product.Picture is not null) {
+            compinedUrl = imageUrl + product.Picture;
+        }
+        <img src="@compinedUrl" alt="@product.Name" style="height: 250px; object-fit: cover;">
+        <div class="mb-3">
+            <label for="image" class="form-label">Image:</label>
+                <FileUpload Product="@product"/>
+            <InputText class="form-control" id="image" @bind-Value="product.Picture" hidden/>
+            <ValidationMessage For="() => product.Picture" />
+        </div>
         <div class="mb-3">
             <label for="name" class="form-label">Name:</label>
             <InputText class="form-control" id="name" @bind-Value="product.Name" />
@@ -60,7 +71,7 @@ else
             <ValidationMessage For="() => product.Quantity" />
         </div>
             <button type="submit" class="btn btn-primary">Submit</button>
-            <a class="btn btn-secondary" role="button" href="/">Cancel</a>
+            <a class="btn btn-secondary" role="button" href="/" @onclick="@demo">Cancel</a>
         </EditForm>
     </div>
 }
@@ -68,6 +79,11 @@ else
 @code {
     [Parameter]
     public int? Id {get; set;}
+    private static string imageUrl = "http://localhost:5054/api/filesave/Assets/Products/";
+
+    private static string defualtImage = "defualt.webp";
+
+    private string compinedUrl = imageUrl + defualtImage;
 
     [SupplyParameterFromForm]
     private ProductDetails? product {get; set;}

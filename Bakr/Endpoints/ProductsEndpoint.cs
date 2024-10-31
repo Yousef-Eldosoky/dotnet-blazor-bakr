@@ -38,7 +38,7 @@ public static class ProductsEndpoint
             dbContext.Products.Add(product);
             await dbContext.SaveChangesAsync();
             return Results.CreatedAtRoute(getProductEndpointName, new { id = product.Id }, product.ToDto());
-        }).RequireAuthorization("AdminPolicy"); ;
+        }).RequireAuthorization("AdminPolicy");
 
         group.MapPut("/{id}", async (int id, CreateProductDto newProduct, BakrDbContext dbContext) =>
         {
@@ -47,7 +47,7 @@ public static class ProductsEndpoint
             dbContext.Products.Entry(product).CurrentValues.SetValues(newProduct.ToEntity(id));
             await dbContext.SaveChangesAsync();
             return Results.NoContent();
-        }).RequireAuthorization("AdminPolicy"); ;
+        }).RequireAuthorization("AdminPolicy");
 
         group.MapDelete("/{id}", async (int id, BakrDbContext dbContext) =>
         {
@@ -55,7 +55,7 @@ public static class ProductsEndpoint
             if (productInvoice is not null) return Results.BadRequest("Item has been found in invoice.");
             await dbContext.Products.Where(product => product.Id == id).ExecuteDeleteAsync();
             return Results.NoContent();
-        }).RequireAuthorization("AdminPolicy"); ;
+        }).RequireAuthorization("AdminPolicy");
         return group;
     }
 }

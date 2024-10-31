@@ -1,26 +1,15 @@
-﻿@page "/file-upload"
-
-@rendermode InteractiveWebAssembly
+﻿@rendermode InteractiveWebAssembly
 @using System.Linq
 @using System.Net.Http.Headers
+@using Bakr.Shared.Dtos
 @using Bakr.Shared.Models
 @inject HttpClient Http
 @inject ILogger<FileUpload> Logger
 @attribute [Authorize]
-
-<PageTitle>File Upload</PageTitle>
-
-<h1>File Upload Example</h1>
-
-<p>
-    Max file size:
-    <br>
-    @maxFileSize
-</p>
+@inject ProductsClient ProductClient
 
 <p>
     <label>
-        Upload up to @maxAllowedFiles files:
         <InputFile OnChange="OnInputFileChange" />
     </label>
 </p>
@@ -58,10 +47,11 @@
 }
 
 @code {
+    [Parameter]
+    public ProductDetails? Product { get; set; }
     private IBrowserFile? file;
     private UploadResult uploadResult = new();
     private long maxFileSize = 1024 * 1024 * 1; // 1 mb
-    private int maxAllowedFiles = 1;
     private bool shouldRender;
     private string? validationMessage;
 
@@ -130,6 +120,10 @@
 
             if (newUploadResult is not null)
             {
+                if(response.IsSuccessStatusCode) {
+                    ArgumentNullException.ThrowIfNull(Product);
+                    Product.Picture = newUploadResult.StoredFileName;
+                }
                 uploadResult = newUploadResult;
             }
         }

@@ -1,7 +1,7 @@
 using System.Net;
 using Bakr.Shared.Models;
 
-namespace Bakr.Data;
+namespace Bakr.Endpoints;
 
 public static class FilesEndpoint
 {
@@ -89,7 +89,7 @@ public static class FilesEndpoint
 
         group.MapGet("/Assets/Products/{fileName}", (string fileName) =>
         {
-            return Results.File("/Users/yousefadel/Documents/ComputerScience/dotnet/Bakr/Bakr/Assets/Products/unsafe_uploads/"+fileName);
+            return Results.File("/Users/yousefadel/Documents/ComputerScience/dotnet/Bakr/Bakr/Assets/Products/unsafe_uploads/" + fileName);
         }).WithName(getFileEndpointName);
 
         return group;
