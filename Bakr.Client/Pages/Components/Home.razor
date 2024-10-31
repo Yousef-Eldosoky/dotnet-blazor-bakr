@@ -22,15 +22,17 @@
                     <h5>Price: @product.Price</h5>
                     <div class="d-flex">
                         <a href="#" class="btn btn-primary me-2">Go somewhere</a>
-                        <a href="/EditProduct/@product.Id" class="btn btn-primary me-2" role="button">
-                            <i class="bi bi-pencil-square"></i>
-                        </a>
-                        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="@GetDeleteModalId(product)">
-                            <i class="bi bi-trash3"></i>
-                        </button>
-                        <CascadingValue Value="this">
-                            <DeleteProduct Product="@product" />
-                        </CascadingValue>
+                        @if(Admin) {
+                            <a href="/EditProduct/@product.Id" class="btn btn-primary me-2" role="button">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="@GetDeleteModalId(product)">
+                                <i class="bi bi-trash3"></i>
+                            </button>
+                            <CascadingValue Value="this">
+                                <DeleteProduct Product="@product" />
+                            </CascadingValue>
+                        }
                     </div>
                 </div>
                 </div>
@@ -44,6 +46,9 @@ else {
 
 @code {
     private Product[]? products;
+
+    [Parameter]
+    public bool Admin { get; set; }
 
     private string GetDeleteModalId(Product product)
     {

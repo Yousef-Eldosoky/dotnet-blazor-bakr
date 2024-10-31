@@ -3,9 +3,9 @@
 
 <AuthorizeView Policy="AdminPolicy">
     <Authorized>
-        <Home />
+        <Home Admin=true />
     </Authorized>
     <NotAuthorized>
-        <NotAdminHome />
+        <Home Admin=false />
     </NotAuthorized>
 </AuthorizeView>
