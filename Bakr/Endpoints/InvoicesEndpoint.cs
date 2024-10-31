@@ -103,7 +103,7 @@ public static class InvoicesEndpoint
             await dbContext.Invoices.Where(invoice => invoice.Id == id).ExecuteDeleteAsync();
             await dbContext.SaveChangesAsync();
             return Results.NoContent();
-        }).RequireAuthorization("AdminPolicy"); ;
+        }).RequireAuthorization("AdminPolicy");
         return group;
     }
 }

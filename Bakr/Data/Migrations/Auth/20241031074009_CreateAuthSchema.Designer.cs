@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Bakr.Data.Migrations.Auth
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241026040702_CreateIdentitySchema")]
-    partial class CreateIdentitySchema
+    [Migration("20241031074009_CreateAuthSchema")]
+    partial class CreateAuthSchema
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -46,6 +46,7 @@ namespace Bakr.Data.Migrations.Auth
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("NormalizedEmail")

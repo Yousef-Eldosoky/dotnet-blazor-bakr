@@ -1,0 +1,163 @@
+﻿@page "/file-upload"
+
+@rendermode InteractiveWebAssembly
+@using System.Linq
+@using System.Net.Http.Headers
+@using Bakr.Shared.Models
+@inject HttpClient Http
+@inject ILogger<FileUpload> Logger
+@attribute [Authorize]
+
+<PageTitle>File Upload</PageTitle>
+
+<h1>File Upload Example</h1>
+
+<p>
+    <label>
+        Upload up to @maxAllowedFiles files:
+        <InputFile OnChange="OnInputFileChange" />
+    </label>
+</p>
+
+@if (validationMessage is not null)
+{
+    <p style="color:red;">@validationMessage</p>
+}
+
+@if (files.Count > 0)
+{
+    <div class="card">
+    <div class="card-body">
+        <ul>
+            @foreach (var file in files)
+                {
+                    <li>
+                        File: @file.Name
+                        <br>
+                        @if (FileUploading(uploadResults, file.Name, Logger,
+                       out var result))
+                        {
+                            <span>
+                                Stored File Name: @result.StoredFileName
+                            </span>
+                        }
+                        else
+                        {
+                            <span>
+                                There was an error uploading the file
+                                (Error: @result.ErrorCode).
+                            </span>
+                        }
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+}
+
+@code {
+    private List<File> files = new();
+    private List<UploadResult> uploadResults = new();
+    private int maxAllowedFiles = 3;
+    private bool shouldRender;
+    private string? validationMessage;
+
+    protected override bool ShouldRender() => shouldRender;
+
+    private async Task OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        shouldRender = false;
+        validationMessage = null;
+        long maxFileSize = 1024 * 1024 * 1; // 1 MB
+        var upload = false;
+
+        using var content = new MultipartFormDataContent();
+
+        foreach (var file in e.GetMultipleFiles(maxAllowedFiles))
+        {
+            if (uploadResults.SingleOrDefault(
+            f => f.FileName == file.Name) is null)
+            {
+                try
+                {
+                    // Check if file is an image by MIME type
+                    if (!file.ContentType.StartsWith("image/"))
+                    {
+                        validationMessage = "Only image files are allowed.";
+                        throw new ArgumentException("Accept images only");
+                    }
+                    files.Add(new() { Name = file.Name });
+
+                    var fileContent = new StreamContent(file.OpenReadStream(maxFileSize));
+
+                    fileContent.Headers.ContentType =
+                    new MediaTypeHeaderValue(file.ContentType);
+
+                    content.Add(
+                    content: fileContent,
+                    name: "\"files\"",
+                    fileName: file.Name);
+
+                    upload = true;
+                }
+                catch (ArgumentException) {
+                    Logger.LogInformation("{FileName} is not an allowed image type (Err: 5)", file.Name);
+                    uploadResults.Add(new UploadResult
+                    {
+                        FileName = file.Name,
+                        ErrorCode = 5, // Custom error code for invalid file type
+                        Uploaded = false
+                    });
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogInformation(
+                    "{FileName} not uploaded (Err: 7): {Message}",
+                    file.Name, ex.Message);
+
+                    uploadResults.Add(
+                    new()
+                        {
+                            FileName = file.Name,
+                            ErrorCode = 7,
+                            Uploaded = false
+                        });
+                }
+            }
+        }
+
+        if (upload)
+        {
+            var response = await Http.PostAsync("/api/Filesave", content);
+
+            var newUploadResults = await response.Content
+            .ReadFromJsonAsync<IList<UploadResult>>();
+
+            if (newUploadResults is not null)
+            {
+                uploadResults = uploadResults.Concat(newUploadResults).ToList();
+            }
+        }
+
+        shouldRender = true;
+    }
+
+    private static bool FileUploading(IList<UploadResult> uploadResults,
+    string? fileName, ILogger<FileUpload> logger, out UploadResult result)
+    {
+        result = uploadResults.SingleOrDefault(f => f.FileName == fileName) ?? new();
+
+        if (!result.Uploaded)
+        {
+            logger.LogInformation("{FileName} not uploaded (Err: 6)", fileName);
+            result.ErrorCode = result.ErrorCode == 0 ? 6 : result.ErrorCode;
+        }
+
+        return result.Uploaded;
+    }
+
+    private class File
+    {
+        public string? Name { get; set; }
+    }
+}

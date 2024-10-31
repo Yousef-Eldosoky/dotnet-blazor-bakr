@@ -6,6 +6,6 @@ namespace Bakr.Data;
 public class ApplicationUser : IdentityUser
 {
     [PersonalData]
-    public string? Name { get; set; }
+    public string Name { get; set; } = "";
 }
 
