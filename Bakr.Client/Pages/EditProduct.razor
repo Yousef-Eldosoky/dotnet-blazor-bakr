@@ -31,6 +31,8 @@ else
         <ValidationSummary />
         @if(@product.Picture is not null) {
             compinedUrl = imageUrl + product.Picture;
+        } else {
+            compinedUrl = imageUrl + defualtImage;
         }
         <img src="@compinedUrl" alt="@product.Name" style="height: 250px; object-fit: cover;">
         <div class="mb-3">
@@ -79,11 +81,11 @@ else
 @code {
     [Parameter]
     public int? Id {get; set;}
-    private static string imageUrl = "http://localhost:5054/api/filesave/Assets/Products/";
+    private static string imageUrl = "api/filesave/Assets/Products/";
 
     private static string defualtImage = "defualt.webp";
 
-    private string compinedUrl = imageUrl + defualtImage;
+    private string? compinedUrl;
 
     [SupplyParameterFromForm]
     private ProductDetails? product {get; set;}
