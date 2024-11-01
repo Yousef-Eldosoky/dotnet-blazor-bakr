@@ -485,6 +485,7 @@ $RECYCLE.BIN/
 
 # Database
 *.db
+Database/
 
 # Assets folder
 Assets
