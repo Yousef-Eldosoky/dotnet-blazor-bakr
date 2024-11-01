@@ -14,13 +14,13 @@ public static class InvoicesEndpoint
     {
         RouteGroupBuilder group = app.MapGroup("api/invoices").WithParameterValidation().RequireAuthorization();
 
-        group.MapGet("/", async (BakrDbContext dbContext) =>
+        group.MapGet("/", async (ApplicationDbContext dbContext) =>
         {
             List<Invoice> invoices = await dbContext.Invoices.Include(p => p.ProductInvoices).AsNoTracking().ToListAsync();
             return Results.Ok(invoices);
         });
 
-        group.MapPost("/", async (CreateInvoiceDto newInvoice, BakrDbContext dbContext, ClaimsPrincipal claims) =>
+        group.MapPost("/", async (CreateInvoiceDto newInvoice, ApplicationDbContext dbContext, ClaimsPrincipal claims) =>
         {
             string userId = claims.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value;
             if (newInvoice.ProductQuantity.Count != newInvoice.ProductsId.Count || newInvoice.ProductQuantity.Count == 0)
@@ -57,7 +57,7 @@ public static class InvoicesEndpoint
             return Results.CreatedAtRoute(getInvoiceEndpointName, new { id = invoice.Id }, invoice);
         });
 
-        group.MapGet("/{id}", async (int id, BakrDbContext dbContext) =>
+        group.MapGet("/{id}", async (int id, ApplicationDbContext dbContext) =>
         {
             Invoice? invoice = await dbContext.Invoices.Include(i => i.ProductInvoices).FirstOrDefaultAsync(i => i.Id == id);
             if (invoice is null) return Results.NotFound();
@@ -91,7 +91,7 @@ public static class InvoicesEndpoint
         });
         */
 
-        group.MapDelete("/{id}", async (int id, BakrDbContext dbContext) =>
+        group.MapDelete("/{id}", async (int id, ApplicationDbContext dbContext) =>
         {
             List<ProductInvoice> productInvoices = await dbContext.ProductInvoices.Include(productInvoices => productInvoices.Product).Where(productInvoices => productInvoices.InvoiceId == id).AsNoTracking().ToListAsync();
             foreach (ProductInvoice productInvoice in productInvoices)

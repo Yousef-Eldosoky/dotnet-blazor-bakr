@@ -34,10 +34,6 @@ builder.Services.AddAuthentication(options =>
 var connectionStringDefualt = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(connectionStringDefualt));
-
-var connectionStringBakr = builder.Configuration.GetConnectionString("BakrConnection") ?? throw new InvalidOperationException("Connection string 'BakrConnection' not found.");
-builder.Services.AddDbContext<BakrDbContext>(options =>
-    options.UseSqlite(connectionStringBakr));
  
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -84,5 +80,6 @@ app.MapInvoiceEndpoint();
 // Creat users and roles for first time run
 IntialMethods.CreateRoles(app.Services.CreateScope().ServiceProvider).Wait();
 IntialMethods.CreateAdmin(app.Services.CreateScope().ServiceProvider).Wait();
+IntialMethods.CreateGenre(app.Services.CreateScope().ServiceProvider).Wait();
 
 app.Run();

@@ -17,13 +17,13 @@ public static class ProductsEndpoint
     {
         RouteGroupBuilder group = app.MapGroup("api/products").WithParameterValidation().RequireAuthorization();
 
-        group.MapGet("/", async (BakrDbContext dbContext) =>
+        group.MapGet("/", async (ApplicationDbContext dbContext) =>
         {
             // await Task.Delay(3000);
             return Results.Ok(await dbContext.Products.Include(product => product.Genre).AsNoTracking().ToListAsync());
         });
 
-        group.MapGet("/{id}", async (int id, BakrDbContext dbContext) =>
+        group.MapGet("/{id}", async (int id, ApplicationDbContext dbContext) =>
         {
             Product? product = await dbContext.Products.FindAsync(id);
             if (product is null) return Results.NotFound();
@@ -31,7 +31,7 @@ public static class ProductsEndpoint
             return Results.Ok(product.ToDto());
         }).WithName(getProductEndpointName);
 
-        group.MapPost("/", async (CreateProductDto newProduct, BakrDbContext dbContext) =>
+        group.MapPost("/", async (CreateProductDto newProduct, ApplicationDbContext dbContext) =>
         {
             Product product = newProduct.ToEntity(null);
             if (product.GenreId != null) product.Genre = await dbContext.Genres.FindAsync(newProduct.GenreId);
@@ -40,7 +40,7 @@ public static class ProductsEndpoint
             return Results.CreatedAtRoute(getProductEndpointName, new { id = product.Id }, product.ToDto());
         }).RequireAuthorization("AdminPolicy"); ;
 
-        group.MapPut("/{id}", async (int id, CreateProductDto newProduct, BakrDbContext dbContext) =>
+        group.MapPut("/{id}", async (int id, CreateProductDto newProduct, ApplicationDbContext dbContext) =>
         {
             Product? product = await dbContext.Products.FindAsync(id);
             if (product is null) return Results.NotFound();
@@ -49,7 +49,7 @@ public static class ProductsEndpoint
             return Results.NoContent();
         }).RequireAuthorization("AdminPolicy"); ;
 
-        group.MapDelete("/{id}", async (int id, BakrDbContext dbContext) =>
+        group.MapDelete("/{id}", async (int id, ApplicationDbContext dbContext) =>
         {
             ProductInvoice? productInvoice = await dbContext.ProductInvoices.Where(p => p.ProductId == id).FirstOrDefaultAsync();
             if (productInvoice is not null) return Results.BadRequest("Item has been found in invoice.");

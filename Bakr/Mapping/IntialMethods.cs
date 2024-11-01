@@ -1,4 +1,5 @@
 using Bakr.Data;
+using Bakr.Shared.Entities;
 using Microsoft.AspNetCore.Identity;
 
 namespace Bakr.Mapping;
@@ -65,5 +66,17 @@ abstract public class IntialMethods
         foreach (string role in roles)
             if (!await roleManager.RoleExistsAsync(role))
                 await roleManager.CreateAsync(new IdentityRole(role));
+    }
+
+    public static async Task CreateGenre(IServiceProvider serviceProvider) {
+        ApplicationDbContext dbContext = serviceProvider.GetRequiredService<ApplicationDbContext>();
+        Genre genre = new()
+        {
+            Name = "حديد",
+        };
+        if(dbContext.Genres.FirstOrDefault(g => g.Name == genre.Name) is null) {
+            dbContext.Genres.Add(genre);
+            await dbContext.SaveChangesAsync();
+        }
     }
 }
