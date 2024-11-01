@@ -33,7 +33,7 @@ builder.Services.AddAuthentication(options =>
 
 var connectionStringDefualt = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(connectionStringDefualt));
+    options.UseSqlServer(connectionStringDefualt));
  
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 

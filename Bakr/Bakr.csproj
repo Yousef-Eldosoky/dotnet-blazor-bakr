@@ -12,12 +12,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.10" />
     <PackageReference Include="MinimalApis.Extensions" Version="0.11.0" />
     <ProjectReference Include="..\Bakr.Client\Bakr.Client.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.8" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.8" />
   </ItemGroup>
 
@@ -27,6 +27,8 @@
 
   <ItemGroup>
     <Folder Include="Assets/" />
+    <Folder Include="Assets/Products/" />
+    <Folder Include="Assets/Products/unsafe_uploads/" />
     <Folder Include="Data/Database/" />
     <Folder Include="Development/" />
     <Folder Include="Development/unsafe_uploads/" />
