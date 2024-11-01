@@ -1,0 +1,147 @@
+﻿@rendermode InteractiveWebAssembly
+@using System.Linq
+@using System.Net.Http.Headers
+@using Bakr.Shared.Dtos
+@using Bakr.Shared.Models
+@inject HttpClient Http
+@inject ILogger<FileUpload> Logger
+@attribute [Authorize]
+@inject ProductsClient ProductClient
+
+<p>
+    <label>
+        <InputFile OnChange="OnInputFileChange" />
+    </label>
+</p>
+
+@if (validationMessage is not null)
+{
+    <p style="color:red;">@validationMessage</p>
+}
+
+@if(file is not null) {
+<div class="card">
+    <div class="card-body">
+        <ul>
+            <li>
+                File: @file.Name
+                <br>
+                @if (FileUploading(uploadResult, file.Name, Logger,
+                out var result))
+                {
+                    <span>
+                        Stored File Name: @result.StoredFileName
+                    </span>
+                }
+                else
+                {
+                    <span>
+                        There was an error uploading the file
+                        (Error: @result.ErrorCode).
+                    </span>
+                }
+            </li>
+        </ul>
+    </div>
+</div>
+}
+
+@code {
+    [Parameter]
+    public ProductDetails? Product { get; set; }
+    private IBrowserFile? file;
+    private UploadResult uploadResult = new();
+    private long maxFileSize = 1024 * 1024 * 1; // 1 mb
+    private bool shouldRender;
+    private string? validationMessage;
+
+    protected override bool ShouldRender() => shouldRender;
+
+    private async Task OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        shouldRender = false;
+        validationMessage = null;
+        var upload = false;
+        file = e.File;
+
+        using var content = new MultipartFormDataContent();
+
+        try
+        {
+            // Check if file is an image by MIME type
+            if (!file.ContentType.StartsWith("image/"))
+            {
+                validationMessage = "Only image files are allowed.";
+                throw new ArgumentException("Accept images only");
+            }
+
+            var fileContent = new StreamContent(file.OpenReadStream(maxFileSize));
+
+            fileContent.Headers.ContentType =
+            new MediaTypeHeaderValue(file.ContentType);
+
+            content.Add(
+            content: fileContent,
+            name: "\"files\"",
+            fileName: file.Name);
+
+            upload = true;
+        }
+        catch (ArgumentException) {
+            Logger.LogInformation("{FileName} is not an allowed image type (Err: 4)", file.Name);
+            uploadResult = new UploadResult
+            {
+                FileName = file.Name,
+                ErrorCode = 4, // Custom error code for invalid file type
+                Uploaded = false
+            };
+        }
+        catch (Exception ex)
+        {
+            Logger.LogInformation(
+            "{FileName} not uploaded (Err: 6): {Message}",
+            file.Name, ex.Message);
+
+            uploadResult =
+            new()
+                {
+                    FileName = file.Name,
+                    ErrorCode = 6,
+                    Uploaded = false
+                };
+        }
+
+        if (upload)
+        {
+            var response = await Http.PostAsync("/api/Filesave", content);
+
+            var newUploadResult = await response.Content
+            .ReadFromJsonAsync<UploadResult>();
+
+            if (newUploadResult is not null)
+            {
+                if(response.IsSuccessStatusCode) {
+                    ArgumentNullException.ThrowIfNull(Product);
+                    Product.Picture = newUploadResult.StoredFileName;
+                }
+                uploadResult = newUploadResult;
+            }
+        }
+
+        shouldRender = true;
+    }
+
+    private static bool FileUploading(UploadResult uploadResult,
+    string? fileName, ILogger<FileUpload> logger, out UploadResult result)
+    {
+        result = uploadResult;
+
+        if (!result.Uploaded)
+        {
+            logger.LogInformation("{FileName} not uploaded (Err: 5)", fileName);
+            result.ErrorCode = result.ErrorCode == 0 ? 5 : result.ErrorCode;
+        }
+
+        return result.Uploaded;
+    }
+}

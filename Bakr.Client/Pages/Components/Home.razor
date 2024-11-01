@@ -10,29 +10,36 @@
     <div class="row g-3 card-group mt-2">
         @foreach(Product product in products) {
             <div class="col-12 col-md-6 col-lg-4">
-                <div class="card" style="width: 18rem;">
-                <img src="https://i5.walmartimages.com/seo/FitRx-SmartBell-Quick-Select-Adjustable-Dumbbell-for-Home-Gym-5-52-5-lbs-Weight-Black-Single_2ca41580-034b-4113-be6b-41148163f94f.ccfc5eff9cced3c1c2296e670813f5a2.png" class="card-img-top img-thumbnail" alt="..." style="height: 250px; object-fit: cover;">
-                <div class="card-body" style="height: 330px;">
-                    <h5 class="card-title">@product.Name</h5>
-                    <p class="card-text" style="height: 125px; text-overflow: ellipsis; overflow: hidden;">@product.Description</p>
-                    @if(product.Genre is not null) {
-                        <h6 class="fw-lighter">Genre: @product.Genre.Name</h6>
+                <div class="card" style="width: 20rem;">
+                    @if(product.Picture is not null) {
+                        compinedUrl = imageUrl + product.Picture;
+                    } else {
+                        compinedUrl = imageUrl + defualtImage;
                     }
-                    <h6 class="fw-lighter">Quantity: @product.Quantity</h6>
-                    <h5>Price: @product.Price</h5>
-                    <div class="d-flex">
-                        <a href="#" class="btn btn-primary me-2">Go somewhere</a>
-                        <a href="/EditProduct/@product.Id" class="btn btn-primary me-2" role="button">
-                            <i class="bi bi-pencil-square"></i>
-                        </a>
-                        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="@GetDeleteModalId(product)">
-                            <i class="bi bi-trash3"></i>
-                        </button>
-                        <CascadingValue Value="this">
-                            <DeleteProduct Product="@product" />
-                        </CascadingValue>
+                    <img src="@compinedUrl" class="card-img-top img-thumbnail" alt="@product.Name" style="height: 250px; object-fit: cover;">
+                    <div class="card-body" style="height: 330px;">
+                        <h5 class="card-title">@product.Name</h5>
+                        <p class="card-text" style="height: 125px; text-overflow: ellipsis; overflow: hidden;">@product.Description</p>
+                        @if(product.Genre is not null) {
+                            <h6 class="fw-lighter">Genre: @product.Genre.Name</h6>
+                        }
+                        <h6 class="fw-lighter">Quantity: @product.Quantity</h6>
+                        <h5>Price: @product.Price</h5>
+                        <div class="d-flex">
+                            <a href="#" class="btn btn-primary me-2">Go somewhere</a>
+                            @if(Admin) {
+                                <a href="/EditProduct/@product.Id" class="btn btn-primary me-2" role="button">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="@GetDeleteModalId(product)">
+                                    <i class="bi bi-trash3"></i>
+                                </button>
+                                <CascadingValue Value="this">
+                                    <DeleteProduct Product="@product" />
+                                </CascadingValue>
+                            }
+                        </div>
                     </div>
-                </div>
                 </div>
             </div>
         }
@@ -44,6 +51,15 @@ else {
 
 @code {
     private Product[]? products;
+    
+    private static string imageUrl = "api/filesave/Assets/Products/";
+
+    private static string defualtImage = "defualt.webp";
+
+    private string? compinedUrl;
+
+    [Parameter]
+    public bool Admin { get; set; }
 
     private string GetDeleteModalId(Product product)
     {

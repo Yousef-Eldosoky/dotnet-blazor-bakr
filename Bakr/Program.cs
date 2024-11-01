@@ -76,6 +76,9 @@ app.MapAdditionalIdentityEndpoints();
 app.MapProductsEndpoint();
 app.MapGenreEndpoint();
 app.MapInvoiceEndpoint();
+app.MapFileEndpoint();
+
+app.MapIdentityApi<ApplicationUser>();
 
 // Creat users and roles for first time run
 IntialMethods.CreateRoles(app.Services.CreateScope().ServiceProvider).Wait();

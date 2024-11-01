@@ -13,6 +13,7 @@ public static class ProductMapping
                 Name = product.Name,
                 GenreId = product.GenreId,
                 Description = product.Description ?? "",
+                Picture = product.Picture,
                 Price = product.Price,
                 Quantity = product.Quantity,
             };
@@ -22,6 +23,7 @@ public static class ProductMapping
             Name = product.Name,
             GenreId = product.GenreId,
             Description = product.Description ?? "",
+            Picture = product.Picture,
             Price = product.Price,
             Quantity = product.Quantity,
         };
