@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace Bakr.Shared.Entities;
 
@@ -15,8 +16,10 @@ public class Invoice
     [ForeignKey("UserId")]
     public required string Name { get; set; }
 
+    [Precision(18, 2)]
     public decimal DiscountInPrice { get; set; } = 0;
 
+    [Precision(18, 2)]
     public List<ProductInvoice> ProductInvoices { get; set; } = [];
 
 }

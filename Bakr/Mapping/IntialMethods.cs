@@ -78,5 +78,13 @@ abstract public class IntialMethods
             dbContext.Genres.Add(genre);
             await dbContext.SaveChangesAsync();
         }
+        genre = new()
+        {
+            Name = "Cross Fit",
+        };
+        if(dbContext.Genres.FirstOrDefault(g => g.Name == genre.Name) is null) {
+            dbContext.Genres.Add(genre);
+            await dbContext.SaveChangesAsync();
+        }
     }
 }

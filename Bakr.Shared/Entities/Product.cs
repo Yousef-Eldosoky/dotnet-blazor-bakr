@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+
 namespace Bakr.Shared.Entities;
 
 public class Product
@@ -13,6 +15,7 @@ public class Product
 
     public string? Picture { get; set; }
 
+    [Precision(18, 2)]
     public required decimal Price { get; set; }
 
     public int Quantity { get; set; } = 0;

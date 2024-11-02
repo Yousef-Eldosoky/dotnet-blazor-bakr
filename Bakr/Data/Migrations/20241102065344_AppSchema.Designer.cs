@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Bakr.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241101182902_AppSchema")]
+    [Migration("20241102065344_AppSchema")]
     partial class AppSchema
     {
         /// <inheritdoc />
@@ -123,6 +123,7 @@ namespace Bakr.Data.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<decimal>("DiscountInPrice")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Name")
@@ -161,6 +162,7 @@ namespace Bakr.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Price")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Quantity")
@@ -182,6 +184,7 @@ namespace Bakr.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("Price")
+                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Quantity")

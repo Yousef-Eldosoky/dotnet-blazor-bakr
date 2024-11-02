@@ -11,6 +11,8 @@ public class ProductInvoice
     public int ProductId { get; set; }
     [ForeignKey("ProductId")]
     public Product Product { get; set; } = null!;
+
+    [Precision(18, 2)]
     public decimal Price { get; set; }
     public int Quantity { get; set; }
 }
