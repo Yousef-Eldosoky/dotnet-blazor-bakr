@@ -11,8 +11,6 @@
 @inject ProductsClient ProductClient
 @inject NavigationManager NavigationManager
 
-<PageTitle>@title</PageTitle>
-
 <h3>@title</h3>
 
 @if (genres is null || product is null)
@@ -111,30 +109,15 @@ else
 
     private bool upload = false;
 
-    private string? title;
+    [Parameter]
+    public required string title {get; set;}
 
     protected override void OnParametersSet()
     {
         if(product is not null) return;
-        if (Id is null)
-        {
-            product = new()
-            {
-                Name = string.Empty,
-                Price = 0
-            };
-            title = "New Product";
-        }
+        product = productFromParent;
     }
 
-    protected override void OnInitialized() {
-        if(Id is not null) {
-            if(productFromParent is not null) {
-                product = productFromParent;
-                title = $"Edit {product.Name}";
-            }
-        }
-    } 
 
     private async Task HandleSubmitAsync() {
         ArgumentNullException.ThrowIfNull(product);

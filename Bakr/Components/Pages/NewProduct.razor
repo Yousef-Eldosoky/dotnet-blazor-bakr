@@ -10,13 +10,30 @@
 @attribute [StreamRendering]
 @inject ApplicationDbContext dbContext
 
-<EditProduct Id="@Id" genres="@genres" productFromParent="@product"/>
+<PageTitle>@title</PageTitle>
+
+<EditProduct Id="@Id" genres="@genres" productFromParent="@product" title="@title"/>
 
 @code {
     [Parameter]
     public int? Id {get; set;}
     private Genre[]? genres;
     private ProductDetails? product;
+
+    private string? title;
+
+    protected override void OnParametersSet()
+    {
+        if (Id is null)
+        {
+            product = new()
+            {
+                Name = string.Empty,
+                Price = 0
+            };
+            title = "New Product";
+        }
+    }
 
 
     protected override async Task OnInitializedAsync() 
@@ -59,6 +76,7 @@
             productHttpContext.Response.Body.Position = 0;
             if(productHttpContext.Response.StatusCode == 200) {
                 product = await JsonSerializer.DeserializeAsync<ProductDetails>(productHttpContext.Response.Body, jsonSerializerOptions);
+                title = $"Edit {product?.Name}";
             }
         }
     }
