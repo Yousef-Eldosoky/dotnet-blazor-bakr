@@ -1,5 +1,6 @@
 ﻿@inject ProductsClient Client
 @rendermode InteractiveWebAssembly
+@inject NavigationManager NavigationManager
 
 <!-- Modal -->
 <div class="modal fade" id="@GetModalId(Product)" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -41,8 +42,6 @@
   private async Task Confirm()
   {
     await Client.DeleteProductAsync(Product!.Id);
-    if(_Parent is not null) {
-      await _Parent.RefreshStateAsync();
-    }
+    NavigationManager.Refresh();
   }
 }

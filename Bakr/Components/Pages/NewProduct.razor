@@ -1,0 +1,65 @@
+﻿@page "/NewProduct"
+@page "/NewProduct/{id:int}"
+@attribute [Authorize(Policy = "AdminPolicy")]
+@using Bakr.Client.Pages
+@using Bakr.Data
+@using Bakr.Endpoints
+@using System.Text.Json
+@using Bakr.Shared.Dtos
+@using Bakr.Shared.Entities
+@attribute [StreamRendering]
+@inject ApplicationDbContext dbContext
+
+<EditProduct Id="@Id" genres="@genres" productFromParent="@product"/>
+
+@code {
+    [Parameter]
+    public int? Id {get; set;}
+    private Genre[]? genres;
+    private ProductDetails? product;
+
+
+    protected override async Task OnInitializedAsync() 
+    {
+        var httpContext = new DefaultHttpContext
+        {
+            // RequestServices needs to be set so the IResult implementation can log.
+            RequestServices = new ServiceCollection().AddLogging().BuildServiceProvider(),
+            Response =
+            {
+                // The default response body is Stream.Null which throws away anything that is written to it.
+                Body = new MemoryStream(),
+            },
+        };
+        IResult result = await GenresEndpoint.GetGenresAsync(dbContext);
+        await result.ExecuteAsync(httpContext);
+        // Reset MemoryStream to start so we can read the response.
+        httpContext.Response.Body.Position = 0;
+        JsonSerializerOptions jsonSerializerOptions = new(JsonSerializerDefaults.Web);
+        if(httpContext.Response.StatusCode == 200) {
+            genres = await JsonSerializer.DeserializeAsync<Genre[]>(httpContext.Response.Body, jsonSerializerOptions);
+        } else {
+            genres = [];
+        }
+        if(Id is not null) {
+            var productHttpContext = new DefaultHttpContext
+            {
+                // RequestServices needs to be set so the IResult implementation can log.
+                RequestServices = new ServiceCollection().AddLogging().BuildServiceProvider(),
+                Response =
+                {
+                    // The default response body is Stream.Null which throws away anything that is written to it.
+                    Body = new MemoryStream(),
+                },
+            };
+            result = await ProductsEndpoint.GetProductAsync(Id.Value, dbContext);
+            await result.ExecuteAsync(productHttpContext);
+
+            // Reset MemoryStream to start so we can read the response.
+            productHttpContext.Response.Body.Position = 0;
+            if(productHttpContext.Response.StatusCode == 200) {
+                product = await JsonSerializer.DeserializeAsync<ProductDetails>(productHttpContext.Response.Body, jsonSerializerOptions);
+            }
+        }
+    }
+}

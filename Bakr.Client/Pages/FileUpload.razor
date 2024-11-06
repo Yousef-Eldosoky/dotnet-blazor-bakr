@@ -1,12 +1,9 @@
 ﻿@rendermode InteractiveWebAssembly
-@using System.Linq
-@using System.Net.Http.Headers
-@using Bakr.Shared.Dtos
+
 @using Bakr.Shared.Models
-@inject HttpClient Http
 @inject ILogger<FileUpload> Logger
 @attribute [Authorize]
-@inject ProductsClient ProductClient
+@attribute [StreamRendering]
 
 <p>
     <label>
@@ -19,14 +16,14 @@
     <p style="color:red;">@validationMessage</p>
 }
 
-@if(file is not null) {
+@if(_Parent is not null && _Parent.file is not null) {
 <div class="card">
     <div class="card-body">
         <ul>
             <li>
-                File: @file.Name
+                File: @_Parent.file.Name
                 <br>
-                @if (FileUploading(uploadResult, file.Name, Logger,
+                @if (FileUploading(uploadResult, _Parent.file.Name, Logger,
                 out var result))
                 {
                     <span>
@@ -47,88 +44,24 @@
 }
 
 @code {
+
+    [CascadingParameter]
+    public EditProduct? _Parent { get; set; }
+
     [Parameter]
-    public ProductDetails? Product { get; set; }
-    private IBrowserFile? file;
-    private UploadResult uploadResult = new();
-    private long maxFileSize = 1024 * 1024 * 1; // 1 mb
-    private bool shouldRender;
-    private string? validationMessage;
+    public required UploadResult uploadResult { get; set; }
+
+    [Parameter]
+    public bool shouldRender { get; set; }
+
+    [Parameter]
+    public string? validationMessage { get; set; }
 
     protected override bool ShouldRender() => shouldRender;
 
-    private async Task OnInputFileChange(InputFileChangeEventArgs e)
-    {
-        shouldRender = false;
-        validationMessage = null;
-        var upload = false;
-        file = e.File;
-
-        using var content = new MultipartFormDataContent();
-
-        try
-        {
-            // Check if file is an image by MIME type
-            if (!file.ContentType.StartsWith("image/"))
-            {
-                validationMessage = "Only image files are allowed.";
-                throw new ArgumentException("Accept images only");
-            }
-
-            var fileContent = new StreamContent(file.OpenReadStream(maxFileSize));
-
-            fileContent.Headers.ContentType =
-            new MediaTypeHeaderValue(file.ContentType);
-
-            content.Add(
-            content: fileContent,
-            name: "\"files\"",
-            fileName: file.Name);
-
-            upload = true;
-        }
-        catch (ArgumentException) {
-            Logger.LogInformation("{FileName} is not an allowed image type (Err: 4)", file.Name);
-            uploadResult = new UploadResult
-            {
-                FileName = file.Name,
-                ErrorCode = 4, // Custom error code for invalid file type
-                Uploaded = false
-            };
-        }
-        catch (Exception ex)
-        {
-            Logger.LogInformation(
-            "{FileName} not uploaded (Err: 6): {Message}",
-            file.Name, ex.Message);
-
-            uploadResult =
-            new()
-                {
-                    FileName = file.Name,
-                    ErrorCode = 6,
-                    Uploaded = false
-                };
-        }
-
-        if (upload)
-        {
-            var response = await Http.PostAsync("/api/Filesave", content);
-
-            var newUploadResult = await response.Content
-            .ReadFromJsonAsync<UploadResult>();
-
-            if (newUploadResult is not null)
-            {
-                if(response.IsSuccessStatusCode) {
-                    ArgumentNullException.ThrowIfNull(Product);
-                    Product.Picture = newUploadResult.StoredFileName;
-                }
-                uploadResult = newUploadResult;
-            }
-        }
-
-        shouldRender = true;
+    private void OnInputFileChange(InputFileChangeEventArgs e) {
+        if(_Parent is null) return;
+        _Parent.file = e.File;
     }
 
     private static bool FileUploading(UploadResult uploadResult,

@@ -9,14 +9,15 @@ public static class GenresEndpoint
 {
     const string getGenreEndpointName = "GetGenre";
 
+    public static async Task<IResult> GetGenresAsync(ApplicationDbContext dbContext)
+    {
+        return Results.Ok(await dbContext.Genres.AsNoTracking().ToListAsync());
+    }
     public static RouteGroupBuilder MapGenreEndpoint(this WebApplication app)
     {
         RouteGroupBuilder group = app.MapGroup("api/genres").WithParameterValidation().RequireAuthorization();
 
-        group.MapGet("/", async (ApplicationDbContext dbContext) =>
-        {
-            return Results.Ok(await dbContext.Genres.AsNoTracking().ToListAsync());
-        });
+        group.MapGet("/", GetGenresAsync);
 
 
         group.MapGet("/{id}", async (int id, ApplicationDbContext dbContext) =>

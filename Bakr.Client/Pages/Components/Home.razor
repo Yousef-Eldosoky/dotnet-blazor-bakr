@@ -1,14 +1,13 @@
-﻿@attribute [StreamRendering]
-@rendermode InteractiveWebAssembly
+﻿@rendermode InteractiveWebAssembly
 @inject ProductsClient Client
 @inject NavigationManager NavigationManager
 
 <PageTitle> Product Catalog</PageTitle>
 
 
-@if(products is not null) {
+@if(Products is not null) {
     <div class="row g-3 card-group mt-2">
-        @foreach(Product product in products) {
+        @foreach(Product product in Products) {
             <div class="col-12 col-md-6 col-lg-4">
                 <div class="card" style="width: 20rem;">
                     @if(product.Picture is not null) {
@@ -28,7 +27,7 @@
                         <div class="d-flex">
                             <a href="#" class="btn btn-primary me-2">Go somewhere</a>
                             @if(Admin) {
-                                <a href="/EditProduct/@product.Id" class="btn btn-primary me-2" role="button">
+                                <a href="/NewProduct/@product.Id" class="btn btn-primary me-2" role="button">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
                                 <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="@GetDeleteModalId(product)">
@@ -50,7 +49,9 @@ else {
 }
 
 @code {
-    private Product[]? products;
+
+    [Parameter]
+    public List<Product>? Products { get; set; }
     
     private static string imageUrl = "api/filesave/Assets/Products/";
 
@@ -64,18 +65,5 @@ else {
     private string GetDeleteModalId(Product product)
     {
         return $"#{DeleteProduct.GetModalId(product)}";
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender) {
-        if(firstRender) await GetProductsAsync();
-    }
-
-    private async Task GetProductsAsync() {
-        products = await Client.GetProductsAsync();
-        StateHasChanged();
-    }
-
-    public async Task RefreshStateAsync(){
-        await this.GetProductsAsync();
     }
 } 

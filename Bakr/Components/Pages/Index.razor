@@ -1,11 +1,48 @@
 ﻿@page "/"
+@using Bakr.Shared.Entities
+@using Bakr.Endpoints
+@using Bakr.Data
+@using System.Text.Json
+@using Microsoft.AspNetCore.Http.HttpResults
 @attribute [Authorize]
+@attribute [StreamRendering]
+@inject ApplicationDbContext dbContext
 
 <AuthorizeView Policy="AdminPolicy">
     <Authorized>
-        <Home Admin=true />
+        <Home Admin=true  Products=@products/>
     </Authorized>
     <NotAuthorized>
         <Home Admin=false />
     </NotAuthorized>
 </AuthorizeView>
+
+@code {
+    private List<Product>? products;
+
+    protected override async Task OnInitializedAsync() 
+    {
+        var productHttpContext = new DefaultHttpContext
+        {
+            // RequestServices needs to be set so the IResult implementation can log.
+            RequestServices = new ServiceCollection().AddLogging().BuildServiceProvider(),
+            Response =
+            {
+                // The default response body is Stream.Null which throws away anything that is written to it.
+                Body = new MemoryStream(),
+            },
+        };
+
+        IResult result = await ProductsEndpoint.GetProductsAsync(dbContext);
+        await result.ExecuteAsync(productHttpContext);
+
+        // Reset MemoryStream to start so we can read the response.
+        productHttpContext.Response.Body.Position = 0;
+        JsonSerializerOptions jsonSerializerOptions = new(JsonSerializerDefaults.Web);
+        if(productHttpContext.Response.StatusCode == 200) {
+            products = await JsonSerializer.DeserializeAsync<List<Product>>(productHttpContext.Response.Body, jsonSerializerOptions);
+        } else {
+            products = [];
+        }
+    }
+}    

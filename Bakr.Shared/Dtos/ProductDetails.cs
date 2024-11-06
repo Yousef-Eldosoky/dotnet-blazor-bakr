@@ -17,8 +17,9 @@ public class ProductDetails
     [Required]
     public int? GenreId { get; set; }
 
-    [Range(1, 100000)]
+    [Range(1, 1000000)]
     public decimal Price { get; set; }
 
+    [Range(1, 100000)]
     public int Quantity { get; set; }
 }

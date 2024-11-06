@@ -1,8 +1,9 @@
-﻿@page "/EditProduct"
-@page "/EditProduct/{id:int}"
-@using Bakr.Shared.Dtos
+﻿@using Bakr.Shared.Dtos
 @using Bakr.Shared.Models
+@using System.Net.Http.Headers
 @attribute [Authorize(Policy = "AdminPolicy")]
+@inject ILogger<FileUpload> Logger
+@inject HttpClient Http
 @rendermode InteractiveWebAssembly
 
 
@@ -37,7 +38,9 @@ else
         <img src="@compinedUrl" alt="@product.Name" style="height: 250px; object-fit: cover;">
         <div class="mb-3">
             <label for="image" class="form-label">Image:</label>
-                <FileUpload Product="@product"/>
+                <CascadingValue Value="this">
+                    <FileUpload uploadResult="@uploadResult" shouldRender="@shouldRender" validationMessage="@validationMessage"/>
+                </CascadingValue>
             <InputText class="form-control" id="image" @bind-Value="product.Picture" hidden/>
             <ValidationMessage For="() => product.Picture" />
         </div>
@@ -83,16 +86,32 @@ else
     public int? Id {get; set;}
     private static string imageUrl = "api/filesave/Assets/Products/";
 
+    private bool shouldRender;
+
+    private string? validationMessage;
+
+    public IBrowserFile? file;
+
+    private UploadResult uploadResult = new();
+
     private static string defualtImage = "defualt.webp";
 
     private string? compinedUrl;
 
+    [Parameter]
+    public ProductDetails? productFromParent {get; set;}
+
     [SupplyParameterFromForm]
     private ProductDetails? product {get; set;}
 
-    private Genre[]? genres;
+    private long maxFileSize = 1024 * 1024 * 1; // 1 mb
 
-    string title = string.Empty;
+    [Parameter]
+    public Genre[]? genres {get; set;}
+
+    private bool upload = false;
+
+    private string? title;
 
     protected override void OnParametersSet()
     {
@@ -104,30 +123,105 @@ else
                 Name = string.Empty,
                 Price = 0
             };
-            title = "New Game";
+            title = "New Product";
         }
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender) {
-        if(firstRender) {
-            genres = await GenresClient.GetGenresAsync();
-            if(Id is not null) {
-                product = await ProductClient.GetProductAsync(Id.Value);
+    protected override void OnInitialized() {
+        if(Id is not null) {
+            if(productFromParent is not null) {
+                product = productFromParent;
                 title = $"Edit {product.Name}";
             }
-            StateHasChanged();
         }
-    }
+    } 
 
     private async Task HandleSubmitAsync() {
         ArgumentNullException.ThrowIfNull(product);
+        if(file is not null) {
+            product.Picture = await InputFileUpload(file);
+        }
         if(Id is null)
             await ProductClient.AddProductAsync(product);
         else {
             product.Id = Id.Value;
             await ProductClient.UpdateProductAsync(product);
         }
-        NavigationManager.NavigateTo("/");
+        @* NavigationManager.NavigateTo("/"); *@
+    }
+
+    private async Task<string?> InputFileUpload(IBrowserFile file)
+    {
+        shouldRender = false;
+        validationMessage = null;
+
+        string? pic = null;
+
+        using var content = new MultipartFormDataContent();
+
+        try
+        {
+            // Check if file is an image by MIME type
+            if (!file.ContentType.StartsWith("image/"))
+            {
+                validationMessage = "Only image files are allowed.";
+                throw new ArgumentException("Accept images only");
+            }
+
+            var fileContent = new StreamContent(file.OpenReadStream(maxFileSize));
+
+            fileContent.Headers.ContentType =
+            new MediaTypeHeaderValue(file.ContentType);
+
+            content.Add(
+            content: fileContent,
+            name: "\"files\"",
+            fileName: file.Name);
+
+            upload = true;
+        }
+        catch (ArgumentException) {
+            Logger.LogInformation("{FileName} is not an allowed image type (Err: 4)", file.Name);
+            uploadResult = new UploadResult
+            {
+                FileName = file.Name,
+                ErrorCode = 4, // Custom error code for invalid file type
+                Uploaded = false
+            };
+        }
+        catch (Exception ex)
+        {
+            Logger.LogInformation(
+            "{FileName} not uploaded (Err: 6): {Message}",
+            file.Name, ex.Message);
+
+            uploadResult =
+            new()
+                {
+                    FileName = file.Name,
+                    ErrorCode = 6,
+                    Uploaded = false
+                };
+        }
+
+        if (upload)
+        {
+            var response = await Http.PostAsync("/api/Filesave", content);
+
+            var newUploadResult = await response.Content
+            .ReadFromJsonAsync<UploadResult>();
+
+            if (newUploadResult is not null)
+            {
+                if(response.IsSuccessStatusCode) {
+                    pic = newUploadResult.StoredFileName;
+                }
+                uploadResult = newUploadResult;
+            }
+        }
+
+        shouldRender = true;
+        return pic;
     }
 
 }
