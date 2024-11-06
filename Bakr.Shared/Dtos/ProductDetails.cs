@@ -20,6 +20,6 @@ public class ProductDetails
     [Range(1, 1000000)]
     public decimal Price { get; set; }
 
-    [Range(1, 100000)]
+    [Range(0, 100000)]
     public int Quantity { get; set; }
 }

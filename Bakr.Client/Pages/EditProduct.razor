@@ -28,7 +28,7 @@ else
         </div><EditForm Model="@product" FormName="EditProduct" OnValidSubmit="HandleSubmitAsync" Enhance>
         <DataAnnotationsValidator />
         <ValidationSummary />
-        @if(@product.Picture is not null) {
+        @if(@product.Picture is not null && @product.Picture != "") {
             compinedUrl = imageUrl + product.Picture;
         } else {
             compinedUrl = imageUrl + defualtImage;
@@ -52,9 +52,9 @@ else
             <InputSelect class="form-select" id="genre" @bind-Value="product.GenreId">
             <option value="">Select a genre</option>
             @foreach (Genre genre in genres)
-                {
+            {
                 <option value="@genre.Id">@genre.Name</option>
-                }
+            }
             </InputSelect>
             <ValidationMessage For="() => product.GenreId" />
         </div>
@@ -122,7 +122,7 @@ else
     private async Task HandleSubmitAsync() {
         ArgumentNullException.ThrowIfNull(product);
         if(file is not null) {
-            product.Picture = await InputFileUpload(file);
+            product.Picture = await InputFileUpload();
         }
         if(Id is null)
             await ProductClient.AddProductAsync(product);
@@ -133,7 +133,7 @@ else
         @* NavigationManager.NavigateTo("/"); *@
     }
 
-    private async Task<string?> InputFileUpload(IBrowserFile file)
+    private async Task<string?> InputFileUpload()
     {
         shouldRender = false;
         validationMessage = null;
@@ -145,7 +145,7 @@ else
         try
         {
             // Check if file is an image by MIME type
-            if (!file.ContentType.StartsWith("image/"))
+            if (!file!.ContentType.StartsWith("image/"))
             {
                 validationMessage = "Only image files are allowed.";
                 throw new ArgumentException("Accept images only");
@@ -164,10 +164,10 @@ else
             upload = true;
         }
         catch (ArgumentException) {
-            Logger.LogInformation("{FileName} is not an allowed image type (Err: 4)", file.Name);
+            @* //Logger.LogInformation("{FileName} is not an allowed image type (Err: 4)", file!.Name); *@
             uploadResult = new UploadResult
             {
-                FileName = file.Name,
+                FileName = file!.Name,
                 ErrorCode = 4, // Custom error code for invalid file type
                 Uploaded = false
             };
@@ -176,7 +176,7 @@ else
         {
             Logger.LogInformation(
             "{FileName} not uploaded (Err: 6): {Message}",
-            file.Name, ex.Message);
+            file!.Name, ex.Message);
 
             uploadResult =
             new()

@@ -4,6 +4,7 @@ using Bakr.Shared.Entities;
 using Microsoft.EntityFrameworkCore;
 using Bakr.Mapping;
 using System.Text.Json;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Bakr.Endpoints;
 
@@ -49,8 +50,8 @@ public static class ProductsEndpoint
         {
             Product? product = await dbContext.Products.FindAsync(id);
             if (product is null) return Results.NotFound();
-            if(product.Picture is not null)
-                File.Delete(Path.Combine(env.ContentRootPath, "Assets", "Products", "unsafe_uploads", product.Picture));
+            if(!product.Picture.IsNullOrEmpty())
+                File.Delete(Path.Combine(env.ContentRootPath, "Assets", "Products", "unsafe_uploads", product.Picture!));
             dbContext.Products.Entry(product).CurrentValues.SetValues(newProduct.ToEntity(id));
             await dbContext.SaveChangesAsync();
             return Results.NoContent();
@@ -61,8 +62,8 @@ public static class ProductsEndpoint
             ProductInvoice? productInvoice = await dbContext.ProductInvoices.Where(p => p.ProductId == id).FirstOrDefaultAsync();
             if (productInvoice is not null) return Results.BadRequest("Item has been found in invoice.");
             Product? product = await dbContext.Products.FindAsync(id);
-            if (product is not null && product.Picture is not null) 
-                File.Delete(Path.Combine(env.ContentRootPath, "Assets", "Products", "unsafe_uploads", product.Picture));
+            if (product is not null && !product.Picture.IsNullOrEmpty()) 
+                File.Delete(Path.Combine(env.ContentRootPath, "Assets", "Products", "unsafe_uploads", product.Picture!));
             await dbContext.Products.Where(product => product.Id == id).ExecuteDeleteAsync();
             return Results.NoContent();
         }).RequireAuthorization("AdminPolicy");

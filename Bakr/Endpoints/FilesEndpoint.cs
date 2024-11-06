@@ -6,7 +6,7 @@ namespace Bakr.Endpoints;
 public static class FilesEndpoint
 {
     const string getFileEndpointName = "GetFile";
-    private static readonly string[] allowedExtensions = [".jpg", ".jpeg", ".png", ".gif"];
+    private static readonly string[] allowedExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp"];
 
     public static RouteGroupBuilder MapFileEndpoint(this WebApplication app)
     {
@@ -24,8 +24,6 @@ public static class FilesEndpoint
             }
 
             var file = request.Form.Files[0];
-
-            uploadResult.StoredFileName = "";
 
             var untrustedFileName = file.FileName;
             uploadResult.FileName = untrustedFileName;

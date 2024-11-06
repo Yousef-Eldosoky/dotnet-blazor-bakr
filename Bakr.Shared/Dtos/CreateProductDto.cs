@@ -9,5 +9,5 @@ public record class CreateProductDto
     int? GenreId,
     string? Picture,
     [Range(1, 1000000)] decimal Price,
-    [Range(1, 100000)]int Quantity
+    [Range(0, 100000)]int Quantity
 );
