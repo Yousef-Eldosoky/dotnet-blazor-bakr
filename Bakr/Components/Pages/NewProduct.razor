@@ -9,6 +9,7 @@
 @using Bakr.Shared.Entities
 @attribute [StreamRendering]
 @inject ApplicationDbContext dbContext
+@inject NavigationManager NavigationManager
 
 <PageTitle>@title</PageTitle>
 
@@ -77,6 +78,8 @@
             if(productHttpContext.Response.StatusCode == 200) {
                 product = await JsonSerializer.DeserializeAsync<ProductDetails>(productHttpContext.Response.Body, jsonSerializerOptions);
                 title = $"Edit {product?.Name}";
+            } else if(productHttpContext.Response.StatusCode == 404) {
+                NavigationManager.NavigateTo("/NewProduct");
             }
         }
     }

@@ -9,7 +9,7 @@
 
 @inject GenresClient GenresClient
 @inject ProductsClient ProductClient
-@inject NavigationManager NavigationManager
+
 
 <h3>@title</h3>
 
@@ -115,7 +115,7 @@ else
     protected override void OnParametersSet()
     {
         if(product is not null) return;
-        product = productFromParent;
+            product = productFromParent;
     }
 
 

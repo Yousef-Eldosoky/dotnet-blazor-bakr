@@ -3,7 +3,6 @@ using Bakr.Shared.Dtos;
 using Bakr.Shared.Entities;
 using Microsoft.EntityFrameworkCore;
 using Bakr.Mapping;
-using System.Text.Json;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Bakr.Endpoints;

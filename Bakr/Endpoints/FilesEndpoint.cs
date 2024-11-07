@@ -87,7 +87,8 @@ public static class FilesEndpoint
 
         group.MapGet("/Assets/Products/{fileName}", (string fileName, IHostEnvironment env) =>
         {
-            return Results.File(Path.Combine(env.ContentRootPath, "Assets", "Products", "unsafe_uploads", fileName));
+            var filePath = Path.Combine(env.ContentRootPath, "Assets", "Products", "unsafe_uploads", fileName);
+            return File.Exists(filePath) ? Results.File(filePath) : Results.NotFound();
         }).WithName(getFileEndpointName);
 
         return group;
