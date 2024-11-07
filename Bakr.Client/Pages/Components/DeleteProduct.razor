@@ -23,9 +23,6 @@
   [Parameter]
   public Product? Product { get; set; }
 
-  [CascadingParameter]
-  public Home? _Parent { get; set; }
-
   private string title = string.Empty;
 
   protected override void OnParametersSet()

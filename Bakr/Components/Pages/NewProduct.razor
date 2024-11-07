@@ -64,7 +64,7 @@
             genres = [];
         }
         if(Id is not null) {
-            var productHttpContext = new DefaultHttpContext
+            httpContext = new DefaultHttpContext
             {
                 // RequestServices needs to be set so the IResult implementation can log.
                 RequestServices = new ServiceCollection().AddLogging().BuildServiceProvider(),
@@ -75,17 +75,17 @@
                 },
             };
             result = await ProductsEndpoint.GetProductAsync(Id.Value, dbContext);
-            await result.ExecuteAsync(productHttpContext);
+            await result.ExecuteAsync(httpContext);
 
             // Reset MemoryStream to start so we can read the response.
-            productHttpContext.Response.Body.Position = 0;
-            if(productHttpContext.Response.StatusCode == 200) {
-                product = await JsonSerializer.DeserializeAsync<ProductDetails>(productHttpContext.Response.Body, jsonSerializerOptions);
+            httpContext.Response.Body.Position = 0;
+            if(httpContext.Response.StatusCode == 200) {
+                product = await JsonSerializer.DeserializeAsync<ProductDetails>(httpContext.Response.Body, jsonSerializerOptions);
                 title = $"Edit {product?.Name}";
                 if(product?.Picture is not null && product.Picture != "") {
                     compindUrl = imageUrl + product.Picture;
                 }
-            } else if(productHttpContext.Response.StatusCode == 404) {
+            } else if(httpContext.Response.StatusCode == 404) {
                 NavigationManager.NavigateTo("/NewProduct");
             }
         }

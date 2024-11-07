@@ -1,13 +1,20 @@
-﻿@rendermode InteractiveWebAssembly
-@inject ProductsClient Client
+﻿@page "/"
+
+@using Bakr.Data
+@using Bakr.Endpoints
+@using Bakr.Shared.Entities
+@using System.Text.Json
 @inject NavigationManager NavigationManager
+@attribute [Authorize]
+@attribute [StreamRendering]
+@inject ApplicationDbContext dbContext
 
 <PageTitle> Product Catalog</PageTitle>
 
 
-@if(Products is not null) {
+@if(products is not null) {
     <div class="row g-3 card-group mt-2">
-        @foreach(Product product in Products) {
+        @foreach(Product product in products) {
             <div class="col-12 col-md-6 col-lg-4">
                 <div class="card" style="width: 20rem;">
                     @if(product.Picture is not null && product.Picture != "") {
@@ -26,7 +33,7 @@
                         <h5>Price: @product.Price</h5>
                         <div class="d-flex">
                             <a href="#" class="btn btn-primary me-2">Go somewhere</a>
-                            @if(isAdmin) {
+                            <AuthorizeView Policy="AdminPolicy">
                                 <a href="/NewProduct/@product.Id" class="btn btn-primary me-2" role="button">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
@@ -36,7 +43,7 @@
                                 <CascadingValue Value="this">
                                     <DeleteProduct Product="@product" />
                                 </CascadingValue>
-                            }
+                            </AuthorizeView>
                         </div>
                     </div>
                 </div>
@@ -49,16 +56,37 @@ else {
 }
 
 @code {
+    private Product[]? products;
 
-    [Parameter]
-    public List<Product>? Products { get; set; }
+    protected override async Task OnInitializedAsync() 
+    {
+        var productHttpContext = new DefaultHttpContext
+        {
+            // RequestServices needs to be set so the IResult implementation can log.
+            RequestServices = new ServiceCollection().AddLogging().BuildServiceProvider(),
+            Response =
+            {
+                // The default response body is Stream.Null which throws away anything that is written to it.
+                Body = new MemoryStream(),
+            },
+        };
+
+        IResult result = await ProductsEndpoint.GetProductsAsync(dbContext);
+        await result.ExecuteAsync(productHttpContext);
+
+        // Reset MemoryStream to start so we can read the response.
+        productHttpContext.Response.Body.Position = 0;
+        JsonSerializerOptions jsonSerializerOptions = new(JsonSerializerDefaults.Web);
+        if(productHttpContext.Response.StatusCode == 200) {
+            products = await JsonSerializer.DeserializeAsync<Product[]>(productHttpContext.Response.Body, jsonSerializerOptions);
+        } else {
+            products = [];
+        }
+    }
     
     private static string imageUrl = "api/filesave/Assets/Products/";
 
     private string? compinedUrl;
-
-    [Parameter]
-    public bool isAdmin { get; set; }
 
     private string GetDeleteModalId(Product product)
     {
