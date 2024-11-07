@@ -10,10 +10,10 @@
         @foreach(Product product in Products) {
             <div class="col-12 col-md-6 col-lg-4">
                 <div class="card" style="width: 20rem;">
-                    @if(product.Picture is not null) {
+                    @if(product.Picture is not null && product.Picture != "") {
                         compinedUrl = imageUrl + product.Picture;
                     } else {
-                        compinedUrl = imageUrl + defualtImage;
+                        compinedUrl = imageUrl + "defualt.webp";
                     }
                     <img src="@compinedUrl" class="card-img-top img-thumbnail" alt="@product.Name" style="height: 250px; object-fit: cover;">
                     <div class="card-body" style="height: 330px;">
@@ -26,7 +26,7 @@
                         <h5>Price: @product.Price</h5>
                         <div class="d-flex">
                             <a href="#" class="btn btn-primary me-2">Go somewhere</a>
-                            @if(Admin) {
+                            @if(isAdmin) {
                                 <a href="/NewProduct/@product.Id" class="btn btn-primary me-2" role="button">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
@@ -55,12 +55,10 @@ else {
     
     private static string imageUrl = "api/filesave/Assets/Products/";
 
-    private static string defualtImage = "defualt.webp";
-
     private string? compinedUrl;
 
     [Parameter]
-    public bool Admin { get; set; }
+    public bool isAdmin { get; set; }
 
     private string GetDeleteModalId(Product product)
     {

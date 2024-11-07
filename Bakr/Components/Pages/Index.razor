@@ -10,10 +10,10 @@
 
 <AuthorizeView Policy="AdminPolicy">
     <Authorized>
-        <Home Admin=true  Products=@products/>
+        <Home isAdmin=true  Products=@products/>
     </Authorized>
     <NotAuthorized>
-        <Home Admin=false Products="@products"/>
+        <Home isAdmin=false Products="@products"/>
     </NotAuthorized>
 </AuthorizeView>
 

@@ -28,12 +28,7 @@ else
         </div><EditForm Model="@product" FormName="EditProduct" OnValidSubmit="HandleSubmitAsync" Enhance>
         <DataAnnotationsValidator />
         <ValidationSummary />
-        @if(@product.Picture is not null && @product.Picture != "") {
-            compinedUrl = imageUrl + product.Picture;
-        } else {
-            compinedUrl = imageUrl + defualtImage;
-        }
-        <img src="@compinedUrl" alt="@product.Name" style="height: 250px; object-fit: cover;">
+        <img src="@compindUrl" alt="@product.Name" style="height: 250px; object-fit: cover;">
         <div class="mb-3">
             <label for="image" class="form-label">Image:</label>
                 <CascadingValue Value="this">
@@ -82,7 +77,6 @@ else
 @code {
     [Parameter]
     public int? Id {get; set;}
-    private static string imageUrl = "api/filesave/Assets/Products/";
 
     private bool shouldRender;
 
@@ -92,9 +86,8 @@ else
 
     private UploadResult uploadResult = new();
 
-    private static string defualtImage = "defualt.webp";
-
-    private string? compinedUrl;
+    [Parameter]
+    public string? compindUrl {get; set;}
 
     [Parameter]
     public ProductDetails? productFromParent {get; set;}
