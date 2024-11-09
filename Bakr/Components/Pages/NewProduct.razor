@@ -87,7 +87,7 @@
                     compindUrl = imageUrl + product.Picture;
                 }
             } else if(httpContext.Response.StatusCode == 404) {
-                NavigationManager.NavigateTo("/NewProduct");
+                NavigationManager.NavigateTo("/NotFound");
             }
         }
     }
