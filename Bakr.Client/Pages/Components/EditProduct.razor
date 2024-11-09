@@ -35,9 +35,12 @@ else
                 <CascadingValue Value="this">
                     <FileUpload uploadResult="@uploadResult" shouldRender="@shouldRender" validationMessage="@validationMessage"/>
                 </CascadingValue>
-                <a class="btn btn-danger" @onclick="DeleteImage" role="button">
-                    <div>Delete Image</div>
-                </a>
+                @if(Id is not null) 
+                {
+                    <a class="btn btn-danger" @onclick="DeleteImage" role="button">
+                        <div>Delete Image</div>
+                    </a>
+                }
             <InputText class="form-control" id="image" @bind-Value="product.Picture" hidden/>
             <ValidationMessage For="() => product.Picture" />
         </div>
