@@ -23,7 +23,7 @@ public class InitialMethods(IServiceProvider serviceProvider)
 
         if (admin == null)
         {
-            admin = new()
+            admin = new ApplicationUser
             {
                 UserName = email,
                 Email = email,
@@ -38,7 +38,7 @@ public class InitialMethods(IServiceProvider serviceProvider)
 
         if (stuff == null)
         {
-            stuff = new()
+            stuff = new ApplicationUser
             {
                 UserName = "stuff@gmail.com",
                 Email = "stuff@gmail.com",
@@ -53,7 +53,7 @@ public class InitialMethods(IServiceProvider serviceProvider)
 
         if (anonymous == null)
         {
-            anonymous = new()
+            anonymous = new ApplicationUser
             {
                 UserName = "yousef@gmail.com",
                 Email = "yousef@gmail.com",

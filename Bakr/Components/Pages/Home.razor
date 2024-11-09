@@ -4,6 +4,8 @@
 @using Bakr.Endpoints
 @using Bakr.Shared.Entities
 @using System.Text.Json
+@using Microsoft.AspNetCore.Http.HttpResults
+
 @inject NavigationManager NavigationManager
 @attribute [Authorize]
 @attribute [StreamRendering]
@@ -56,32 +58,15 @@ else {
 }
 
 @code {
-    private Product[]? products;
+    private List<Product>? products;
 
     protected override async Task OnInitializedAsync() 
     {
-        var productHttpContext = new DefaultHttpContext
+        products = await ProductsEndpoint.GetProductsAsync(dbContext) switch 
         {
-            // RequestServices needs to be set so the IResult implementation can log.
-            RequestServices = new ServiceCollection().AddLogging().BuildServiceProvider(),
-            Response =
-            {
-                // The default response body is Stream.Null which throws away anything that is written to it.
-                Body = new MemoryStream(),
-            },
+            Ok<List<Product>> ok => ok.Value,
+            _ => []
         };
-
-        IResult result = await ProductsEndpoint.GetProductsAsync(dbContext);
-        await result.ExecuteAsync(productHttpContext);
-
-        // Reset MemoryStream to start so we can read the response.
-        productHttpContext.Response.Body.Position = 0;
-        JsonSerializerOptions jsonSerializerOptions = new(JsonSerializerDefaults.Web);
-        if(productHttpContext.Response.StatusCode == 200) {
-            products = await JsonSerializer.DeserializeAsync<Product[]>(productHttpContext.Response.Body, jsonSerializerOptions);
-        } else {
-            products = [];
-        }
     }
     
     private static string imageUrl = "api/filesave/Assets/Products/";

@@ -41,4 +41,16 @@ public static class ProductMapping
             product.Quantity
         );
     }
+
+    public static ProductDetails ToDetails(this ProductDto product) {
+        return new() {
+            Description = product.Description,
+            GenreId = product.GenreId,
+            Name = product.Name,
+            Id = product.Id,
+            Picture = product.Picture,
+            Price = product.Price,
+            Quantity = product.Quantity
+        };
+    }
 }

@@ -6,8 +6,11 @@
 @using Bakr.Data
 @using Bakr.Endpoints
 @using System.Text.Json
+@using Bakr.Mapping
 @using Bakr.Shared.Dtos
 @using Bakr.Shared.Entities
+@using Microsoft.AspNetCore.Http.HttpResults
+
 @attribute [StreamRendering]
 @inject ApplicationDbContext dbContext
 @inject NavigationManager NavigationManager
@@ -16,10 +19,12 @@
 
 <EditProduct Id="@Id" genres="@genres" productFromParent="@product" title="@title"/>
 
+<br/>
+
 @code {
     [Parameter]
     public int? Id {get; set;}
-    private Genre[]? genres;
+    private List<Genre>? genres;
     private ProductDetails? product;
 
     private string? title;
@@ -40,47 +45,25 @@
 
     protected override async Task OnInitializedAsync() 
     {
-        var httpContext = new DefaultHttpContext
+        genres = await GenresEndpoint.GetGenresAsync(dbContext) switch 
         {
-            // RequestServices needs to be set so the IResult implementation can log.
-            RequestServices = new ServiceCollection().AddLogging().BuildServiceProvider(),
-            Response =
-            {
-                // The default response body is Stream.Null which throws away anything that is written to it.
-                Body = new MemoryStream(),
-            },
+            Ok<List<Genre>> ok => ok.Value,
+            _ => []
         };
-        IResult result = await GenresEndpoint.GetGenresAsync(dbContext);
-        await result.ExecuteAsync(httpContext);
-        // Reset MemoryStream to start so we can read the response.
-        httpContext.Response.Body.Position = 0;
-        JsonSerializerOptions jsonSerializerOptions = new(JsonSerializerDefaults.Web);
-        if(httpContext.Response.StatusCode == 200) {
-            genres = await JsonSerializer.DeserializeAsync<Genre[]>(httpContext.Response.Body, jsonSerializerOptions);
-        } else {
-            genres = [];
-        }
+        
         if(Id is not null) {
-            httpContext = new DefaultHttpContext
-            {
-                // RequestServices needs to be set so the IResult implementation can log.
-                RequestServices = new ServiceCollection().AddLogging().BuildServiceProvider(),
-                Response =
-                {
-                    // The default response body is Stream.Null which throws away anything that is written to it.
-                    Body = new MemoryStream(),
-                },
-            };
-            result = await ProductsEndpoint.GetProductAsync(Id.Value, dbContext);
-            await result.ExecuteAsync(httpContext);
-
-            // Reset MemoryStream to start so we can read the response.
-            httpContext.Response.Body.Position = 0;
-            if(httpContext.Response.StatusCode == 200) {
-                product = await JsonSerializer.DeserializeAsync<ProductDetails>(httpContext.Response.Body, jsonSerializerOptions);
-                title = $"Edit {product?.Name}";
-            } else if(httpContext.Response.StatusCode == 404) {
-                NavigationManager.NavigateTo("/NotFound");
+            var result = await ProductsEndpoint.GetProductAsync(Id.Value, dbContext);
+            switch (result.Result) {
+                case Ok<ProductDto> ok:
+                    product = ok.Value!.ToDetails();
+                    title = $"Edit {product.Name}";
+                    break;
+                case Microsoft.AspNetCore.Http.HttpResults.NotFound notFound:
+                    NavigationManager.NavigateTo("/NotFound");
+                    break;
+                default:
+                    NavigationManager.NavigateTo("/Error");
+                    break;
             }
         }
     }

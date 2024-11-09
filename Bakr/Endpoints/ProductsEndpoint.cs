@@ -4,6 +4,7 @@ using Bakr.Shared.Entities;
 using Microsoft.EntityFrameworkCore;
 using Bakr.Mapping;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Bakr.Endpoints;
 
@@ -21,12 +22,12 @@ public static class ProductsEndpoint
         return Results.Ok(await dbContext.Products.Include(product => product.Genre).AsNoTracking().ToListAsync());
     }
 
-    public static async Task<IResult> GetProductAsync(int id, ApplicationDbContext dbContext)
+    public static async Task<Results<Ok<ProductDto>, NotFound>> GetProductAsync(int id, ApplicationDbContext dbContext)
     {
         Product? product = await dbContext.Products.FindAsync(id);
-        if (product is null) return Results.NotFound();
+        if (product is null) return TypedResults.NotFound();
         if (product.GenreId != null) product.Genre = await dbContext.Genres.FindAsync(product.GenreId);
-        return Results.Ok(product.ToDto());
+        return TypedResults.Ok(product.ToDto());
     }
     public static RouteGroupBuilder MapProductsEndpoint(this WebApplication app)
     {

@@ -30,8 +30,6 @@
     <Folder Include="Assets/Products/" />
     <Folder Include="Assets/Products/unsafe_uploads/" />
     <Folder Include="Data/Database/" />
-    <Folder Include="Development/" />
-    <Folder Include="Development/unsafe_uploads/" />
   </ItemGroup>
 
 </Project>
