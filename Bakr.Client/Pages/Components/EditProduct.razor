@@ -9,6 +9,7 @@
 
 @inject GenresClient GenresClient
 @inject ProductsClient ProductClient
+@inject NavigationManager NavigationManager
 
 
 <h3>@title</h3>
@@ -107,7 +108,7 @@ else
 
     protected override void OnParametersSet()
     {
-        if(product is not null) return;
+        if(product is null) 
             product = productFromParent;
     }
 
@@ -115,7 +116,9 @@ else
     private async Task HandleSubmitAsync() {
         ArgumentNullException.ThrowIfNull(product);
         if(file is not null) {
-            product.Picture = await InputFileUpload();
+            await InputFileUpload();
+            if(!uploadResult.Uploaded) return;
+            product.Picture = uploadResult.StoredFileName;
         }
         if(Id is null)
             await ProductClient.AddProductAsync(product);
@@ -123,15 +126,13 @@ else
             product.Id = Id.Value;
             await ProductClient.UpdateProductAsync(product);
         }
-        @* NavigationManager.NavigateTo("/"); *@
+        NavigationManager.NavigateTo("/");
     }
 
-    private async Task<string?> InputFileUpload()
+    private async Task InputFileUpload()
     {
         shouldRender = false;
         validationMessage = null;
-
-        string? pic = null;
 
         using var content = new MultipartFormDataContent();
 
@@ -189,15 +190,11 @@ else
 
             if (newUploadResult is not null)
             {
-                if(response.IsSuccessStatusCode) {
-                    pic = newUploadResult.StoredFileName;
-                }
                 uploadResult = newUploadResult;
             }
         }
 
         shouldRender = true;
-        return pic;
     }
 
 }
