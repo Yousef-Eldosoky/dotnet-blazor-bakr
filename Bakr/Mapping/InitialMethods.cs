@@ -4,11 +4,16 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Bakr.Mapping;
 
-abstract public class IntialMethods
+public class InitialMethods(IServiceProvider serviceProvider)
 {
-    public static async Task CreateAdmin(IServiceProvider serviceProvider)
+
+    public async Task InitialMethodsCreate() {
+        await CreateRoles(serviceProvider.GetRequiredService<RoleManager<IdentityRole>>());
+        await CreateAdmin(serviceProvider.GetRequiredService<UserManager<ApplicationUser>>());
+        await CreateGenre(serviceProvider.GetRequiredService<ApplicationDbContext>());
+    }
+    private static async Task CreateAdmin(UserManager<ApplicationUser> userManger)
     {
-        UserManager<ApplicationUser> userManger = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         string[] roles = ["Admin", "Stuff"];
 
         string email = "admin@gmail.com";
@@ -58,9 +63,8 @@ abstract public class IntialMethods
         }
     }
 
-    public static async Task CreateRoles(IServiceProvider serviceProvider)
+    private static async Task CreateRoles(RoleManager<IdentityRole> roleManager)
     {
-        RoleManager<IdentityRole> roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
         string[] roles = ["Admin", "Stuff"];
 
         foreach (string role in roles)
@@ -68,8 +72,7 @@ abstract public class IntialMethods
                 await roleManager.CreateAsync(new IdentityRole(role));
     }
 
-    public static async Task CreateGenre(IServiceProvider serviceProvider) {
-        ApplicationDbContext dbContext = serviceProvider.GetRequiredService<ApplicationDbContext>();
+    private static async Task CreateGenre(ApplicationDbContext dbContext) {
         Genre genre = new()
         {
             Name = "حديد",

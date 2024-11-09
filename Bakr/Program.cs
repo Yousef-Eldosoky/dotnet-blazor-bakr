@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Bakr.Client.Pages;
 using Bakr.Components;
 using Bakr.Components.Account;
 using Bakr.Data;
@@ -52,15 +51,19 @@ if (app.Environment.IsDevelopment())
 {
     app.UseWebAssemblyDebugging();
     app.UseMigrationsEndPoint();
+    
+    // Creat app users and needed data for testing
+    InitialMethods initialMethods = new(app.Services.CreateScope().ServiceProvider);
+    initialMethods.InitialMethodsCreate().Wait();
 }
 else
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
+    app.UseHttpsRedirection();
 }
 
-app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 app.UseAntiforgery();
@@ -79,10 +82,5 @@ app.MapInvoiceEndpoint();
 app.MapFileEndpoint();
 
 app.MapIdentityApi<ApplicationUser>();
-
-// Creat users and roles for first time run
-IntialMethods.CreateRoles(app.Services.CreateScope().ServiceProvider).Wait();
-IntialMethods.CreateAdmin(app.Services.CreateScope().ServiceProvider).Wait();
-IntialMethods.CreateGenre(app.Services.CreateScope().ServiceProvider).Wait();
 
 app.Run();
