@@ -81,6 +81,6 @@ app.MapGenreEndpoint();
 app.MapInvoiceEndpoint();
 app.MapFileEndpoint();
 
-app.MapIdentityApi<ApplicationUser>();
+app.CustomMapIdentityApi<ApplicationUser>();
 
 app.Run();
