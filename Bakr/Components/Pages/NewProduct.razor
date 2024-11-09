@@ -14,17 +14,13 @@
 
 <PageTitle>@title</PageTitle>
 
-<EditProduct Id="@Id" genres="@genres" productFromParent="@product" title="@title" compindUrl="@compindUrl"/>
+<EditProduct Id="@Id" genres="@genres" productFromParent="@product" title="@title"/>
 
 @code {
     [Parameter]
     public int? Id {get; set;}
     private Genre[]? genres;
     private ProductDetails? product;
-
-    private static string imageUrl = "api/filesave/Assets/Products/";
-
-    private string compindUrl = imageUrl + "defualt.webp";
 
     private string? title;
 
@@ -83,9 +79,6 @@
             if(httpContext.Response.StatusCode == 200) {
                 product = await JsonSerializer.DeserializeAsync<ProductDetails>(httpContext.Response.Body, jsonSerializerOptions);
                 title = $"Edit {product?.Name}";
-                if(product?.Picture is not null && product.Picture != "") {
-                    compindUrl = imageUrl + product.Picture;
-                }
             } else if(httpContext.Response.StatusCode == 404) {
                 NavigationManager.NavigateTo("/NotFound");
             }

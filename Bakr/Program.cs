@@ -20,6 +20,7 @@ builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, PersistingServerAuthenticationStateProvider>();
 builder.Services.AddHttpClient<ProductsClient>();
 builder.Services.AddHttpClient<GenresClient>();
+builder.Services.AddTransient<InitialMethods>();
 
 builder.Services.AddAuthorizationBuilder()
     .AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
@@ -51,9 +52,10 @@ if (app.Environment.IsDevelopment())
 {
     app.UseWebAssemblyDebugging();
     app.UseMigrationsEndPoint();
-    
+
     // Creat app users and needed data for testing
-    InitialMethods initialMethods = new(app.Services.CreateScope().ServiceProvider);
+    using var scope = app.Services.CreateScope();
+    var initialMethods = scope.ServiceProvider.GetRequiredService<InitialMethods>();
     initialMethods.InitialMethodsCreate().Wait();
 }
 else

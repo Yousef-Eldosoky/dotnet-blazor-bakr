@@ -35,6 +35,9 @@ else
                 <CascadingValue Value="this">
                     <FileUpload uploadResult="@uploadResult" shouldRender="@shouldRender" validationMessage="@validationMessage"/>
                 </CascadingValue>
+                <a class="btn btn-danger" @onclick="DeleteImage" role="button">
+                    <div>Delete Image</div>
+                </a>
             <InputText class="form-control" id="image" @bind-Value="product.Picture" hidden/>
             <ValidationMessage For="() => product.Picture" />
         </div>
@@ -87,8 +90,9 @@ else
 
     private UploadResult uploadResult = new();
 
-    [Parameter]
-    public string? compindUrl {get; set;}
+    private static string imageUrl = "api/filesave/Assets/Products/";
+
+    private string compindUrl = imageUrl + "defualt.webp";
 
     [Parameter]
     public ProductDetails? productFromParent {get; set;}
@@ -109,9 +113,19 @@ else
     protected override void OnParametersSet()
     {
         if(product is null) 
+        {
             product = productFromParent;
+            if(product?.Picture is not null && product.Picture != "") {
+                compindUrl = imageUrl + product.Picture;
+            }
+        }
     }
 
+    private void DeleteImage() {
+        file = null;
+        product!.Picture = null;
+        compindUrl = imageUrl + "defualt.webp";
+    }
 
     private async Task HandleSubmitAsync() {
         ArgumentNullException.ThrowIfNull(product);
