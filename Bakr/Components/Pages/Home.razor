@@ -3,10 +3,8 @@
 @using Bakr.Data
 @using Bakr.Endpoints
 @using Bakr.Shared.Entities
-@using System.Text.Json
 @using Microsoft.AspNetCore.Http.HttpResults
 
-@inject NavigationManager NavigationManager
 @attribute [Authorize]
 @attribute [StreamRendering]
 @inject ApplicationDbContext dbContext
@@ -60,13 +58,10 @@ else {
 @code {
     private List<Product>? products;
 
-    protected override async Task OnInitializedAsync() 
+    protected override async Task OnInitializedAsync()
     {
-        products = await ProductsEndpoint.GetProductsAsync(dbContext) switch 
-        {
-            Ok<List<Product>> ok => ok.Value,
-            _ => []
-        };
+        Ok<List<Product>> res = await ProductsEndpoint.GetProductsAsync(dbContext);
+        products = res.Value;
     }
     
     private static string imageUrl = "api/filesave/Assets/Products/";

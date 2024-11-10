@@ -1,17 +1,16 @@
 ﻿@page "/NewProduct"
 @page "/NewProduct/{id:int}"
 
-@attribute [Authorize(Policy = "AdminPolicy")]
-@using Bakr.Client.Pages
 @using Bakr.Data
 @using Bakr.Endpoints
-@using System.Text.Json
 @using Bakr.Mapping
 @using Bakr.Shared.Dtos
 @using Bakr.Shared.Entities
 @using Microsoft.AspNetCore.Http.HttpResults
 
 @attribute [StreamRendering]
+@attribute [Authorize(Policy = "AdminPolicy")]
+
 @inject ApplicationDbContext dbContext
 @inject NavigationManager NavigationManager
 
@@ -33,7 +32,7 @@
     {
         if (Id is null)
         {
-            product = new()
+            product = new ProductDetails
             {
                 Name = string.Empty,
                 Price = 0
@@ -45,20 +44,17 @@
 
     protected override async Task OnInitializedAsync() 
     {
-        genres = await GenresEndpoint.GetGenresAsync(dbContext) switch 
-        {
-            Ok<List<Genre>> ok => ok.Value,
-            _ => []
-        };
+        Ok<List<Genre>> res = await GenresEndpoint.GetGenresAsync(dbContext);
+        genres = res.Value;
         
         if(Id is not null) {
             var result = await ProductsEndpoint.GetProductAsync(Id.Value, dbContext);
             switch (result.Result) {
                 case Ok<ProductDto> ok:
-                    product = ok.Value!.ToDetails();
-                    title = $"Edit {product.Name}";
+                    product = ok.Value?.ToDetails();
+                    title = $"Edit {product?.Name}";
                     break;
-                case Microsoft.AspNetCore.Http.HttpResults.NotFound notFound:
+                case NotFound notFound:
                     NavigationManager.NavigateTo("/NotFound");
                     break;
                 default:

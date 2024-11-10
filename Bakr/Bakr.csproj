@@ -29,7 +29,6 @@
     <Folder Include="Assets/" />
     <Folder Include="Assets/Products/" />
     <Folder Include="Assets/Products/unsafe_uploads/" />
-    <Folder Include="Data/Database/" />
   </ItemGroup>
 
 </Project>

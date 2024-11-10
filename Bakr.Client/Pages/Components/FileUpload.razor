@@ -16,7 +16,7 @@
     <p style="color:red;">@validationMessage</p>
 }
 
-@if(_Parent is not null && _Parent.file is not null) {
+@if(_Parent?.file != null) {
 <div class="card">
     <div class="card-body">
         <ul>
@@ -71,8 +71,8 @@
 
         if (!result.Uploaded)
         {
-            logger.LogInformation("{FileName} not uploaded (Err: 5)", fileName);
             result.ErrorCode = result.ErrorCode == 0 ? 5 : result.ErrorCode;
+            logger.LogInformation("{FileName} not uploaded (Err: {result.ErrorCode})", fileName, result.ErrorCode);
         }
 
         return result.Uploaded;
