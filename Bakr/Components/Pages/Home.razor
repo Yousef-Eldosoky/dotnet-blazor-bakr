@@ -20,7 +20,7 @@
                     @if(product.Picture is not null && product.Picture != "") {
                         compinedUrl = imageUrl + product.Picture;
                     } else {
-                        compinedUrl = imageUrl + "defualt.webp";
+                        compinedUrl = imageUrl + "default.webp";
                     }
                     <img src="@compinedUrl" class="card-img-top img-thumbnail" alt="@product.Name" style="height: 250px; object-fit: cover;">
                     <div class="card-body" style="height: 330px;">
@@ -60,8 +60,7 @@ else {
 
     protected override async Task OnInitializedAsync()
     {
-        Ok<List<Product>> res = await ProductsEndpoint.GetProductsAsync(dbContext);
-        products = res.Value;
+        products = (await ProductsEndpoint.GetProductsAsync(dbContext)).Value;
     }
     
     private static string imageUrl = "api/filesave/Assets/Products/";

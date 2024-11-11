@@ -95,7 +95,7 @@ else
 
     private static string imageUrl = "api/filesave/Assets/Products/";
 
-    private string compindUrl = imageUrl + "defualt.webp";
+    private string compindUrl = imageUrl + "default.webp";
 
     [Parameter]
     public ProductDetails? productFromParent {get; set;}
@@ -127,7 +127,7 @@ else
     private void DeleteImage() {
         file = null;
         product!.Picture = null;
-        compindUrl = imageUrl + "defualt.webp";
+        compindUrl = imageUrl + "default.webp";
     }
 
     private async Task HandleSubmitAsync() {

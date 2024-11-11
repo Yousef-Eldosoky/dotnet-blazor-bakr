@@ -44,17 +44,17 @@
 
     protected override async Task OnInitializedAsync() 
     {
-        Ok<List<Genre>> res = await GenresEndpoint.GetGenresAsync(dbContext);
-        genres = res.Value;
+        genres = (await GenresEndpoint.GetGenresAsync(dbContext)).Value;
         
-        if(Id is not null) {
-            var result = await ProductsEndpoint.GetProductAsync(Id.Value, dbContext);
-            switch (result.Result) {
+        if(Id is not null)
+        {
+            var response = await ProductsEndpoint.GetProductAsync(Id.Value, dbContext);
+            switch (response.Result) {
                 case Ok<ProductDto> ok:
                     product = ok.Value?.ToDetails();
                     title = $"Edit {product?.Name}";
                     break;
-                case NotFound notFound:
+                case NotFound:
                     NavigationManager.NavigateTo("/NotFound");
                     break;
                 default:
