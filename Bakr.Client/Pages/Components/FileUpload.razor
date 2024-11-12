@@ -7,7 +7,7 @@
 
 <p>
     <label>
-        <InputFile OnChange="OnInputFileChange" />
+        <InputFile OnChange="OnInputFileChange" accept=".jpg, .jpeg, .png, .gif, .webp" class="form-control" />
     </label>
 </p>
 
@@ -17,30 +17,31 @@
 }
 
 @if(_Parent?.file != null) {
-<div class="card">
-    <div class="card-body">
-        <ul>
-            <li>
-                File: @_Parent.file.Name
-                <br>
-                @if (FileUploading(uploadResult, _Parent.file.Name, Logger,
-                out var result))
-                {
-                    <span>
-                        Stored File Name: @result.StoredFileName
-                    </span>
-                }
-                else
-                {
-                    <span style="color: red;">
-                        There was an error uploading the file
-                        (Error: @result.ErrorCode).
-                    </span>
-                }
-            </li>
-        </ul>
+    <div class="card">
+        <div class="card-body">
+            <ul>
+                <li>
+                    File: @_Parent.file.Name
+                    <br>
+                    @if (FileUploading(uploadResult, _Parent.file.Name, Logger,
+                             out var result))
+                    {
+                        <span>
+                            Waiting for upload..
+                        </span>
+                    }
+                    else
+                    {
+                        <span style="color: red;">
+                            There was an error uploading the file
+                            (Error: @result.ErrorCode).
+                        </span>
+                    }
+                </li>
+            </ul>
+        </div>
     </div>
-</div>
+    <br />
 }
 
 @code {
