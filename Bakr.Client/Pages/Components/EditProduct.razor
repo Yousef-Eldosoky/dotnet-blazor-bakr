@@ -1,6 +1,7 @@
 ﻿@using Bakr.Shared.Dtos
 @using Bakr.Shared.Models
 @using System.Net.Http.Headers
+
 @attribute [Authorize(Policy = "AdminPolicy")]
 @inject ILogger<FileUpload> Logger
 @inject HttpClient Http
@@ -12,9 +13,9 @@
 @inject NavigationManager NavigationManager
 
 
-<h3>@title</h3>
+<h3>@Title</h3>
 
-@if (genres is null || product is null)
+@if (Genres is null || Product is null)
 {
     <div class="d-flex justify-content-center">
         <div class="spinner-border m-5" role="status">
@@ -26,55 +27,56 @@ else
 {
     <div class="row">
         <div class="col-md-4">
-        </div><EditForm Model="@product" FormName="EditProduct" OnValidSubmit="HandleSubmitAsync" Enhance>
-        <DataAnnotationsValidator />
-        <ValidationSummary />
-        <img src="@compindUrl" alt="@product.Name" style="height: 250px; object-fit: cover;">
-        <div class="mb-3">
-            <label for="image" class="form-label">Image:</label>
-                <CascadingValue Value="this">
-                    <FileUpload uploadResult="@uploadResult" shouldRender="@shouldRender" validationMessage="@validationMessage"/>
-                </CascadingValue>
-                @if(Id is not null) 
+        </div>
+        <EditForm Model="@Product" FormName="EditProduct" OnValidSubmit="HandleSubmitAsync" Enhance>
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <img src="@_combinedUrl" alt="@Product.Name" style="height: 250px; object-fit: cover;">
+            <div class="mb-3">
+                <label for="image" class="form-label">Image:</label>
+                    <CascadingValue Value="this">
+                        <FileUpload UploadResult="@_uploadResult" ValidationMessage="@_validationMessage" ShouldRenderComponent="@_shouldRender" />
+                    </CascadingValue>
+                    @if(Id is not null) 
+                    {
+                        <a class="btn btn-danger" @onclick="DeleteImage" role="button">
+                            <div>Delete Image</div>
+                        </a>
+                    }
+                <InputText class="form-control" id="image" @bind-Value="Product.Picture" hidden/>
+                <ValidationMessage For="() => Product.Picture" />
+            </div>
+            <div class="mb-3">
+                <label for="name" class="form-label">Name:</label>
+                <InputText class="form-control" id="name" @bind-Value="Product.Name" />
+                <ValidationMessage For="() => Product.Name" />
+            </div>
+            <div class="mb-3">
+                <label for="genre" class="form-label">Genre:</label>
+                <InputSelect class="form-select" id="genre" @bind-Value="Product.GenreId">
+                <option value="">Select a genre</option>
+                @foreach (Genre genre in Genres)
                 {
-                    <a class="btn btn-danger" @onclick="DeleteImage" role="button">
-                        <div>Delete Image</div>
-                    </a>
+                    <option value="@genre.Id">@genre.Name</option>
                 }
-            <InputText class="form-control" id="image" @bind-Value="product.Picture" hidden/>
-            <ValidationMessage For="() => product.Picture" />
-        </div>
-        <div class="mb-3">
-            <label for="name" class="form-label">Name:</label>
-            <InputText class="form-control" id="name" @bind-Value="product.Name" />
-            <ValidationMessage For="() => product.Name" />
-        </div>
-        <div class="mb-3">
-            <label for="genre" class="form-label">Genre:</label>
-            <InputSelect class="form-select" id="genre" @bind-Value="product.GenreId">
-            <option value="">Select a genre</option>
-            @foreach (Genre genre in genres)
-            {
-                <option value="@genre.Id">@genre.Name</option>
-            }
-            </InputSelect>
-            <ValidationMessage For="() => product.GenreId" />
-        </div>
-        <div class="mb-3">
-            <label for="description" class="form-label">Description:</label>
-            <InputText class="form-control" id="description" @bind-Value="product.Description" />
-            <ValidationMessage For="() => product.Description" />
-        </div>
-        <div class="mb-3">
-            <label for="price" class="form-label">Price:</label>
-            <InputNumber class="form-control" id="price" @bind-Value="product.Price" />
-            <ValidationMessage For="() => product.Price" />
-        </div>
-        <div class="mb-3">
-            <label for="quantity" class="form-label">Quantity:</label>
-            <InputNumber class="form-control" id="Quantity" @bind-Value="product.Quantity" />
-            <ValidationMessage For="() => product.Quantity" />
-        </div>
+                </InputSelect>
+                <ValidationMessage For="() => Product.GenreId" />
+            </div>
+            <div class="mb-3">
+                <label for="description" class="form-label">Description:</label>
+                <InputText class="form-control" id="description" @bind-Value="Product.Description" />
+                <ValidationMessage For="() => Product.Description" />
+            </div>
+            <div class="mb-3">
+                <label for="price" class="form-label">Price:</label>
+                <InputNumber class="form-control" id="price" @bind-Value="Product.Price" />
+                <ValidationMessage For="() => Product.Price" />
+            </div>
+            <div class="mb-3">
+                <label for="quantity" class="form-label">Quantity:</label>
+                <InputNumber class="form-control" id="quantity" @bind-Value="Product.Quantity" />
+                <ValidationMessage For="() => Product.Quantity" />
+            </div>
             <button type="submit" class="btn btn-primary">Submit</button>
             <a class="btn btn-secondary" role="button" href="/">Cancel</a>
         </EditForm>
@@ -85,100 +87,97 @@ else
     [Parameter]
     public int? Id {get; set;}
 
-    private bool shouldRender;
+    private string? _validationMessage;
 
-    private string? validationMessage;
+    public IBrowserFile? File;
 
-    public IBrowserFile? file;
+    private UploadResult _uploadResult = new();
 
-    private UploadResult uploadResult = new();
+    private bool _shouldRender;
 
-    private static string imageUrl = "api/filesave/Assets/Products/";
+    private static string _imageUrl = "api/fileSave/Assets/Products/";
 
-    private string compindUrl = imageUrl + "default.webp";
+    private string _combinedUrl = _imageUrl + "default.webp";
 
     [Parameter]
-    public ProductDetails? productFromParent {get; set;}
+    public ProductDetails? ProductFromParent {get; set;}
 
     [SupplyParameterFromForm]
-    private ProductDetails? product {get; set;}
+    private ProductDetails? Product {get; set;}
 
-    private long maxFileSize = 1024 * 1024 * 1; // 1 mb
-
-    [Parameter]
-    public List<Genre>? genres {get; set;}
-
-    private bool upload = false;
+    private long _maxFileSize = 1024 * 1024 * 1; // 1 mb
 
     [Parameter]
-    public required string title {get; set;}
+    public List<Genre>? Genres {get; set;}
 
-    protected override void OnParametersSet()
+    private bool _upload = false;
+
+    [Parameter]
+    public required string Title {get; set;}
+
+    protected override void OnInitialized()
     {
-        if(product is null) 
-        {
-            product = productFromParent;
-            if(product?.Picture is not null && product.Picture != "") {
-                compindUrl = imageUrl + product.Picture;
-            }
+        Product = ProductFromParent;
+        if(Product?.Picture is not null && Product.Picture != "") {
+            _combinedUrl = _imageUrl + Product.Picture;
         }
     }
 
     private void DeleteImage() {
-        file = null;
-        product!.Picture = null;
-        compindUrl = imageUrl + "default.webp";
+        File = null;
+        Product!.Picture = null;
+        _combinedUrl = _imageUrl + "default.webp";
     }
 
     private async Task HandleSubmitAsync() {
-        ArgumentNullException.ThrowIfNull(product);
-        if(file is not null) {
+        ArgumentNullException.ThrowIfNull(Product);
+        if(File is not null) {
             await InputFileUpload();
-            if(!uploadResult.Uploaded) return;
-            product.Picture = uploadResult.StoredFileName;
+            if(!_uploadResult.Uploaded) return;
+            Product.Picture = _uploadResult.StoredFileName;
         }
         if(Id is null)
-            await ProductClient.AddProductAsync(product);
+            await ProductClient.AddProductAsync(Product);
         else {
-            product.Id = Id.Value;
-            await ProductClient.UpdateProductAsync(product);
+            Product.Id = Id.Value;
+            await ProductClient.UpdateProductAsync(Product);
         }
         NavigationManager.NavigateTo("/");
     }
 
     private async Task InputFileUpload()
     {
-        shouldRender = false;
-        validationMessage = null;
+        _shouldRender = false;
+        _validationMessage = null;
 
         using var content = new MultipartFormDataContent();
 
         try
         {
             // Check if file is an image by MIME type
-            if (!file!.ContentType.StartsWith("image/"))
+            if (!File!.ContentType.StartsWith("image/"))
             {
-                validationMessage = "Only image files are allowed.";
+                _validationMessage = "Only image files are allowed.";
                 throw new ArgumentException("Accept images only");
             }
 
-            var fileContent = new StreamContent(file.OpenReadStream(maxFileSize));
+            var fileContent = new StreamContent(File.OpenReadStream(_maxFileSize));
 
             fileContent.Headers.ContentType =
-            new MediaTypeHeaderValue(file.ContentType);
+            new MediaTypeHeaderValue(File.ContentType);
 
             content.Add(
             content: fileContent,
             name: "\"files\"",
-            fileName: file.Name);
+            fileName: File.Name);
 
-            upload = true;
+            _upload = true;
         }
         catch (ArgumentException) {
             @* //Logger.LogInformation("{FileName} is not an allowed image type (Err: 4)", file!.Name); *@
-            uploadResult = new UploadResult
+            _uploadResult = new UploadResult
             {
-                FileName = file!.Name,
+                FileName = File!.Name,
                 ErrorCode = 4, // Custom error code for invalid file type
                 Uploaded = false
             };
@@ -187,31 +186,31 @@ else
         {
             Logger.LogInformation(
             "{FileName} not uploaded (Err: 6): {Message}",
-            file!.Name, ex.Message);
+            File!.Name, ex.Message);
 
-            uploadResult =
+            _uploadResult =
             new()
                 {
-                    FileName = file.Name,
+                    FileName = File.Name,
                     ErrorCode = 6,
                     Uploaded = false
                 };
         }
 
-        if (upload)
+        if (_upload)
         {
-            var response = await Http.PostAsync("/api/Filesave", content);
+            var response = await Http.PostAsync("/api/FileSave", content);
 
             var newUploadResult = await response.Content
             .ReadFromJsonAsync<UploadResult>();
 
             if (newUploadResult is not null)
             {
-                uploadResult = newUploadResult;
+                _uploadResult = newUploadResult;
             }
         }
 
-        shouldRender = true;
+        _shouldRender = true;
     }
 
 }

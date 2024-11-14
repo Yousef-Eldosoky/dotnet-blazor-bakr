@@ -10,7 +10,7 @@ public static class FilesEndpoint
 
     public static RouteGroupBuilder MapFileEndpoint(this IEndpointRouteBuilder endpoints)
     {
-        RouteGroupBuilder group = endpoints.MapGroup("/api/filesave").RequireAuthorization();
+        RouteGroupBuilder group = endpoints.MapGroup("/api/fileSave").RequireAuthorization();
 
         group.MapPost("/", UploadImageAsync);
 

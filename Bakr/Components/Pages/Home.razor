@@ -3,26 +3,25 @@
 @using Bakr.Data
 @using Bakr.Endpoints
 @using Bakr.Shared.Entities
-@using Microsoft.AspNetCore.Http.HttpResults
 
 @attribute [Authorize]
 @attribute [StreamRendering]
-@inject ApplicationDbContext dbContext
+@inject ApplicationDbContext DbContext
 
 <PageTitle> Product Catalog</PageTitle>
 
 
-@if(products is not null) {
+@if(_products is not null) {
     <div class="row g-3 card-group mt-2">
-        @foreach(Product product in products) {
+        @foreach(Product product in _products) {
             <div class="col-12 col-md-6 col-lg-4">
                 <div class="card" style="width: 20rem;">
                     @if(product.Picture is not null && product.Picture != "") {
-                        compinedUrl = imageUrl + product.Picture;
+                        _combinedUrl = ImageUrl + product.Picture;
                     } else {
-                        compinedUrl = imageUrl + "default.webp";
+                        _combinedUrl = ImageUrl + "default.webp";
                     }
-                    <img src="@compinedUrl" class="card-img-top img-thumbnail" alt="@product.Name" style="height: 250px; object-fit: cover;">
+                    <img src="@_combinedUrl" class="card-img-top img-thumbnail" alt="@product.Name" style="height: 250px; object-fit: cover;">
                     <div class="card-body" style="height: 330px;">
                         <h5 class="card-title">@product.Name</h5>
                         <p class="card-text" style="height: 125px; text-overflow: ellipsis; overflow: hidden;">@product.Description</p>
@@ -56,18 +55,18 @@ else {
 }
 
 @code {
-    private List<Product>? products;
+    private List<Product>? _products;
 
     protected override async Task OnInitializedAsync()
     {
-        products = (await ProductsEndpoint.GetProductsAsync(dbContext)).Value;
+        _products = (await ProductsEndpoint.GetProductsAsync(DbContext)).Value;
     }
-    
-    private static string imageUrl = "api/filesave/Assets/Products/";
 
-    private string? compinedUrl;
+    private const string ImageUrl = "api/filesave/Assets/Products/";
 
-    private string GetDeleteModalId(Product product)
+    private string? _combinedUrl;
+
+    private static string GetDeleteModalId(Product product)
     {
         return $"#{DeleteProduct.GetModalId(product)}";
     }

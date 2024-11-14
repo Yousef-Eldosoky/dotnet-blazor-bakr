@@ -2,7 +2,7 @@ using Bakr.Shared.Entities;
 
 namespace Bakr.Shared.Dtos;
 
-public record class InvoiceDto
+public record InvoiceDto
 (
     int Id,
     string UserName,

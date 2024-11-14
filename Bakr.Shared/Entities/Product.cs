@@ -18,6 +18,6 @@ public class Product
     [Precision(18, 2)]
     public required decimal Price { get; set; }
 
-    public int Quantity { get; set; } = 0;
+    public int Quantity { get; set; }
 
 }

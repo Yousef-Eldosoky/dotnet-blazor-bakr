@@ -17,7 +17,7 @@ public class Invoice
     public required string Name { get; set; }
 
     [Precision(18, 2)]
-    public decimal DiscountInPrice { get; set; } = 0;
+    public decimal DiscountInPrice { get; set; }
 
     [Precision(18, 2)]
     public List<ProductInvoice> ProductInvoices { get; set; } = [];

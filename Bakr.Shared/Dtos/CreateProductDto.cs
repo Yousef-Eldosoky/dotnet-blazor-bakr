@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Bakr.Shared.Dtos;
 
-public record class CreateProductDto
+public record CreateProductDto
 (
     [Required][StringLength(50)] string Name,
     string? Description,

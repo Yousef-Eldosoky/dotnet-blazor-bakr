@@ -35,7 +35,7 @@ public static class ProductMapping
             product.Id,
             product.Name,
             product.Description,
-            product.Genre is null ? 0 : product.Genre.Id,
+            product.Genre?.Id ?? 0,
             product.Picture,
             product.Price,
             product.Quantity

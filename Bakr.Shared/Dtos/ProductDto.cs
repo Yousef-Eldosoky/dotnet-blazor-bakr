@@ -1,6 +1,6 @@
 namespace Bakr.Shared.Dtos;
 
-public record class ProductDto
+public record ProductDto
 (
     int Id,
     string Name,

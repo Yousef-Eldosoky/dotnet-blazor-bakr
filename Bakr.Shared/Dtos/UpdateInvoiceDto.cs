@@ -1,6 +1,6 @@
 namespace Bakr.Shared.Dtos;
 
-public record class UpdateInvoiceDto
+public record UpdateInvoiceDto
 (
     List<int>? ProductsId,
     List<int>? ProductQuantity,

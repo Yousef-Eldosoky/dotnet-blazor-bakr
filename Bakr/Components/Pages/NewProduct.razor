@@ -11,48 +11,48 @@
 @attribute [StreamRendering]
 @attribute [Authorize(Policy = "AdminPolicy")]
 
-@inject ApplicationDbContext dbContext
+@inject ApplicationDbContext DbContext
 @inject NavigationManager NavigationManager
 
-<PageTitle>@title</PageTitle>
+<PageTitle>@_title</PageTitle>
 
-<EditProduct Id="@Id" genres="@genres" productFromParent="@product" title="@title"/>
+<EditProduct Id="@Id" Genres="@_genres" ProductFromParent="@_product" Title="@_title"/>
 
 <br/>
 
 @code {
     [Parameter]
     public int? Id {get; set;}
-    private List<Genre>? genres;
-    private ProductDetails? product;
+    private List<Genre>? _genres;
+    private ProductDetails? _product;
 
-    private string? title;
+    private string? _title;
 
     protected override void OnParametersSet()
     {
         if (Id is null)
         {
-            product = new ProductDetails
+            _product = new ProductDetails
             {
                 Name = string.Empty,
                 Price = 0
             };
-            title = "New Product";
+            _title = "New Product";
         }
     }
 
 
     protected override async Task OnInitializedAsync() 
     {
-        genres = (await GenresEndpoint.GetGenresAsync(dbContext)).Value;
+        _genres = (await GenresEndpoint.GetGenresAsync(DbContext)).Value;
         
         if(Id is not null)
         {
-            var response = await ProductsEndpoint.GetProductAsync(Id.Value, dbContext);
+            var response = await ProductsEndpoint.GetProductAsync(Id.Value, DbContext);
             switch (response.Result) {
                 case Ok<ProductDto> ok:
-                    product = ok.Value?.ToDetails();
-                    title = $"Edit {product?.Name}";
+                    _product = ok.Value?.ToDetails();
+                    _title = $"Edit {_product?.Name}";
                     break;
                 case NotFound:
                     NavigationManager.NavigateTo("/NotFound");

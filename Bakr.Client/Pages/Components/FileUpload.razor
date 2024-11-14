@@ -11,19 +11,19 @@
     </label>
 </p>
 
-@if (validationMessage is not null)
+@if (ValidationMessage is not null)
 {
-    <p style="color:red;">@validationMessage</p>
+    <p style="color:red;">@ValidationMessage</p>
 }
 
-@if(_Parent?.file != null) {
+@if(Parent?.File != null) {
     <div class="card">
         <div class="card-body">
             <ul>
                 <li>
-                    File: @_Parent.file.Name
+                    File: @Parent.File.Name
                     <br>
-                    @if (FileUploading(uploadResult, _Parent.file.Name, Logger,
+                    @if (FileUploading(UploadResult, Parent.File.Name, Logger,
                              out var result))
                     {
                         <span>
@@ -47,22 +47,22 @@
 @code {
 
     [CascadingParameter]
-    public EditProduct? _Parent { get; set; }
+    public EditProduct? Parent { get; set; }
 
     [Parameter]
-    public required UploadResult uploadResult { get; set; }
+    public required UploadResult UploadResult { get; set; }
 
     [Parameter]
-    public bool shouldRender { get; set; }
+    public string? ValidationMessage { get; set; }
 
     [Parameter]
-    public string? validationMessage { get; set; }
+    public bool ShouldRenderComponent { get; set; }
 
-    protected override bool ShouldRender() => shouldRender;
+    protected override bool ShouldRender() => ShouldRenderComponent;
 
     private void OnInputFileChange(InputFileChangeEventArgs e) {
-        if(_Parent is null) return;
-        _Parent.file = e.File;
+        if(Parent is null) return;
+        Parent.File = e.File;
     }
 
     private static bool FileUploading(UploadResult uploadResult,

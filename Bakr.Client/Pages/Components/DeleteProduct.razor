@@ -7,7 +7,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h1 class="modal-title fs-5" id="exampleModalLabel">@title</h1>
+        <h1 class="modal-title fs-5" id="exampleModalLabel">@_title</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-footer">
@@ -23,11 +23,11 @@
   [Parameter]
   public Product? Product { get; set; }
 
-  private string title = string.Empty;
+  private string _title = string.Empty;
 
   protected override void OnParametersSet()
   {
-    title = $"Delete {Product?.Name}?";
+    _title = $"Delete {Product?.Name}?";
   }
 
   public static string GetModalId(Product? product)
