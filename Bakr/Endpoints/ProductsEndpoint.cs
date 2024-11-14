@@ -60,7 +60,7 @@ public static class ProductsEndpoint
         Product? product = await dbContext.Products.FindAsync(id);
         if (product is null) return TypedResults.NotFound();
         if(!product.Picture.IsNullOrEmpty() && product.Picture != newProduct.Picture)
-            File.Delete(Path.Combine(env.ContentRootPath, "Assets", "Products", "unsafe_uploads", product.Picture!));
+            File.Delete(Path.Combine(env.ContentRootPath, "wwwroot", "Assets", "Products", "unsafe_uploads", product.Picture!));
         dbContext.Products.Entry(product).CurrentValues.SetValues(newProduct.ToEntity(id));
         await dbContext.SaveChangesAsync();
         return TypedResults.NoContent();
@@ -75,7 +75,7 @@ public static class ProductsEndpoint
         {
             await dbContext.Products.Where(p => p.Id == id).ExecuteDeleteAsync();
             if (!product.Picture.IsNullOrEmpty())
-                File.Delete(Path.Combine(env.ContentRootPath, "Assets", "Products", "unsafe_uploads", product.Picture!));
+                File.Delete(Path.Combine(env.ContentRootPath, "wwwroot", "Assets", "Products", "unsafe_uploads", product.Picture!));
         }
         return TypedResults.NoContent();
     }

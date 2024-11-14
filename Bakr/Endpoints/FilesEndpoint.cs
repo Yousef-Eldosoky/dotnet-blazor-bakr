@@ -21,7 +21,7 @@ public static class FilesEndpoint
     
     private static Results<FileStreamHttpResult, NotFound> GetFile(string fileName, IHostEnvironment env)
     {
-        var filePath = Path.Combine(env.ContentRootPath, "Assets", "Products", "unsafe_uploads", fileName);
+        var filePath = Path.Combine(env.ContentRootPath, "wwwroot", "Assets", "Products", "unsafe_uploads", fileName);
         if (File.Exists(filePath))
         {
             return TypedResults.File(File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.None));
@@ -75,9 +75,9 @@ public static class FilesEndpoint
                         var trustedFileNameForFileStorage = Path.ChangeExtension(Path.GetRandomFileName(), fileExtension);
 
                         //var trustedFileNameForFileStorage = Path.GetRandomFileName();
-                        var path = Path.Combine(env.ContentRootPath, "Assets", "Products", "unsafe_uploads", trustedFileNameForFileStorage);
+                        var path = Path.Combine(env.ContentRootPath, "wwwroot", "Assets", "Products", "unsafe_uploads", trustedFileNameForFileStorage);
 
-                        Directory.CreateDirectory(Path.Combine(env.ContentRootPath, "Assets", "Products", "unsafe_uploads"));
+                        Directory.CreateDirectory(Path.Combine(env.ContentRootPath, "wwwroot", "Assets", "Products", "unsafe_uploads"));
 
                         await using FileStream fs = new(path, FileMode.Create);
                         await file.CopyToAsync(fs);
