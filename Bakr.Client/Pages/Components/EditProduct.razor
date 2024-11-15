@@ -3,12 +3,10 @@
 @using System.Net.Http.Headers
 
 @attribute [Authorize(Policy = "AdminPolicy")]
-@inject ILogger<FileUpload> Logger
-@inject HttpClient Http
 @rendermode InteractiveWebAssembly
 
-
-@inject GenresClient GenresClient
+@inject ILogger<FileUpload> Logger
+@inject HttpClient Http
 @inject ProductsClient ProductClient
 @inject NavigationManager NavigationManager
 
@@ -28,7 +26,7 @@ else
     <div class="row">
         <div class="col-md-4">
         </div>
-        <EditForm Model="@Product" FormName="EditProduct" OnValidSubmit="HandleSubmitAsync" Enhance>
+        <EditForm Model="Product" FormName="EditProduct" OnValidSubmit="HandleSubmitAsync" Enhance>
             <DataAnnotationsValidator />
             <ValidationSummary />
             <img src="@_combinedUrl" alt="@Product.Name" style="height: 250px; object-fit: cover;">
@@ -37,10 +35,10 @@ else
                     <CascadingValue Value="this">
                         <FileUpload UploadResult="@_uploadResult" ValidationMessage="@_validationMessage" ShouldRenderComponent="@_shouldRender" />
                     </CascadingValue>
-                    @if(Id is not null) 
+                    @if(Id is not null)
                     {
                         <a class="btn btn-danger" @onclick="DeleteImage" role="button">
-                            <div>Delete Image</div>
+                            Delete Image
                         </a>
                     }
                 <InputText class="form-control" id="image" @bind-Value="Product.Picture" hidden/>
@@ -105,18 +103,17 @@ else
     [SupplyParameterFromForm]
     private ProductDetails? Product {get; set;}
 
-    private long _maxFileSize = 1024 * 1024 * 1; // 1 mb
+    private long _maxFileSize = 1024 * 1024 * 3; // 3 mb
 
     [Parameter]
     public List<Genre>? Genres {get; set;}
 
-    private bool _upload = false;
-
     [Parameter]
     public required string Title {get; set;}
 
-    protected override void OnInitialized()
+    protected override void OnParametersSet()
     {
+        if (Product is not null) return;
         Product = ProductFromParent;
         if(Product?.Picture is not null && Product.Picture != "") {
             _combinedUrl = _imageUrl + Product.Picture;
@@ -149,6 +146,7 @@ else
     {
         _shouldRender = false;
         _validationMessage = null;
+        bool upload = false;
 
         using var content = new MultipartFormDataContent();
 
@@ -171,10 +169,10 @@ else
             name: "\"files\"",
             fileName: File.Name);
 
-            _upload = true;
+            upload = true;
         }
         catch (ArgumentException) {
-            @* //Logger.LogInformation("{FileName} is not an allowed image type (Err: 4)", file!.Name); *@
+            Logger.LogInformation("{FileName} is not an allowed image type (Err: 4)", File!.Name);
             _uploadResult = new UploadResult
             {
                 FileName = File!.Name,
@@ -185,19 +183,18 @@ else
         catch (Exception ex)
         {
             Logger.LogInformation(
-            "{FileName} not uploaded (Err: 6): {Message}",
+            "{FileName} not uploaded (Err: 5): {Message}",
             File!.Name, ex.Message);
 
-            _uploadResult =
-            new()
-                {
-                    FileName = File.Name,
-                    ErrorCode = 6,
-                    Uploaded = false
-                };
+            _uploadResult = new UploadResult
+            {
+                FileName = File.Name,
+                ErrorCode = 5,
+                Uploaded = false
+            };
         }
 
-        if (_upload)
+        if (upload)
         {
             var response = await Http.PostAsync("/api/FileSave", content);
 

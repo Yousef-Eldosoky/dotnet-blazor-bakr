@@ -30,15 +30,14 @@
 
     protected override void OnParametersSet()
     {
-        if (Id is null)
+        if (_product is not null || Id is not null) return;
+        
+        _product = new ProductDetails
         {
-            _product = new ProductDetails
-            {
-                Name = string.Empty,
-                Price = 0
-            };
-            _title = "New Product";
-        }
+            Name = string.Empty,
+            Price = 0
+        };
+        _title = "New Product";
     }
 
 

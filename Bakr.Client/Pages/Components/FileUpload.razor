@@ -16,7 +16,7 @@
     <p style="color:red;">@ValidationMessage</p>
 }
 
-@if(Parent?.File != null) {
+@if(Parent?.File is not null) {
     <div class="card">
         <div class="card-body">
             <ul>

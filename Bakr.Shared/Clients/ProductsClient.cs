@@ -7,8 +7,7 @@ namespace Bakr.Shared.Clients;
 public class ProductsClient(HttpClient httpClient)
 {
     public async Task<Product[]> GetProductsAsync() => await httpClient.GetFromJsonAsync<Product[]>("api/products") ?? [];
-
-
+    
     public async Task<ProductDetails> GetProductAsync(int id) => await httpClient.GetFromJsonAsync<ProductDetails>($"api/products/{id}") ?? throw new Exception("Product not found!"); 
 
     public async Task AddProductAsync(ProductDetails product) => await httpClient.PostAsJsonAsync("api/products", product);

@@ -31,7 +31,7 @@ public static class FilesEndpoint
     
     private static async Task<Results<BadRequest<string>, Created<UploadResult>>> UploadImageAsync(HttpRequest request, IHostEnvironment env, ILogger<Program> logger)
     {
-        const long maxFileSize = 1024 * 1024 * 1;
+        const long maxFileSize = 1024 * 1024 * 3; // 3 mb
         var resourcePath = new Uri($"{request.Scheme}://{request.Host}/");
         var uploadResult = new UploadResult();
 
