@@ -19,26 +19,6 @@ public static class InvoicesEndpoint
 
         group.MapGet("/{id:int}", GetInvoiceAsync).WithName(nameof(GetInvoiceAsync));
 
-        // Unfinished function
-        /**
-        group.MapPut("/{id}", async (int id, UpdateInvoiceDto newInvoice, ClaimsPrincipal claims, BakrContext dbContext)=>{
-            string userId = claims.Claims.First(c=> c.Type == ClaimTypes.NameIdentifier).Value;
-            if (await dbContext.UserRoles.FindAsync(userId, 1) == null) return Results.Forbid();
-            Invoice? invoice = await dbContext.Invoices.FindAsync(id);
-            if (invoice is null) return Results.NotFound();
-            invoice.DiscountInPrice = newInvoice.DiscountInPrice;
-            
-            List<ProductInvoice> productInvoices = await dbContext.ProductInvoices.Where(productInvoice => productInvoice.InvoiceId == id).AsNoTracking().ToListAsync();
-            foreach (ProductInvoice productInvoice in productInvoices)
-            {
-                Product? product = await dbContext.Products.FindAsync(productInvoice.ProductId);
-                product!.Quantity += productInvoice.Quantity;
-                dbContext.Products.Entry(product).CurrentValues.SetValues(product);
-            }
-            return Results.NoContent();
-        });
-        */
-
         group.MapDelete("/{id:int}", DeleteInvoiceAsync).RequireAuthorization("AdminPolicy");
         
         return group;
