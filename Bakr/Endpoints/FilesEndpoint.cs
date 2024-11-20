@@ -14,19 +14,7 @@ public static class FilesEndpoint
 
         group.MapPost("/", UploadImageAsync);
 
-        group.MapGet("/Assets/Products/{fileName}", GetFile);
-
         return group;
-    }
-    
-    private static Results<FileStreamHttpResult, NotFound> GetFile(string fileName, IHostEnvironment env)
-    {
-        var filePath = Path.Combine(env.ContentRootPath, "wwwroot", "Assets", "Products", "unsafe_uploads", fileName);
-        if (File.Exists(filePath))
-        {
-            return TypedResults.File(File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.None));
-        }
-        else return TypedResults.NotFound();
     }
     
     private static async Task<Results<BadRequest<string>, Created<UploadResult>>> UploadImageAsync(HttpRequest request, IHostEnvironment env, ILogger<Program> logger)
@@ -75,9 +63,9 @@ public static class FilesEndpoint
                         var trustedFileNameForFileStorage = Path.ChangeExtension(Path.GetRandomFileName(), fileExtension);
 
                         //var trustedFileNameForFileStorage = Path.GetRandomFileName();
-                        var path = Path.Combine(env.ContentRootPath, "wwwroot", "Assets", "Products", "unsafe_uploads", trustedFileNameForFileStorage);
+                        var path = Path.Combine(env.ContentRootPath, "wwwroot", "Assets", "Products", trustedFileNameForFileStorage);
 
-                        Directory.CreateDirectory(Path.Combine(env.ContentRootPath, "wwwroot", "Assets", "Products", "unsafe_uploads"));
+                        Directory.CreateDirectory(Path.Combine(env.ContentRootPath, "wwwroot", "Assets", "Products"));
 
                         await using FileStream fs = new(path, FileMode.Create);
                         await file.CopyToAsync(fs);
@@ -99,7 +87,7 @@ public static class FilesEndpoint
 
         if (uploadResult.Uploaded)
         {
-            resourcePath = new Uri($"{resourcePath.AbsoluteUri}api/filesave/Assets/Products/{uploadResult.StoredFileName}");
+            resourcePath = new Uri($"{resourcePath.AbsoluteUri}Assets/Products/{uploadResult.StoredFileName}");
         }
         
         return TypedResults.Created(resourcePath, uploadResult);
